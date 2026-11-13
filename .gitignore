@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.db
+*.db-journal
+public/uploads/*
+!public/uploads/.gitkeep
+coverage/
+.DS_Store
+*.log
