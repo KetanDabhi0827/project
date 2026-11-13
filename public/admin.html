@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin & Moderation Console | Slideshow Hub</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 850px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    .panel-card {
+      padding: 1.5rem;
+    }
+    .controls-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+    .photo-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .photo-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+    .photo-meta {
+      padding: 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .badge-status {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-hidden { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <a href="/admin.html" class="brand">
+      ⚙️ <span>Slideshow Moderator</span>
+      <span class="badge">Admin</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/" class="nav-link">📸 Visitor Upload</a>
+      <a href="/tv.html" class="nav-link" target="_blank">📺 Open Smart TV</a>
+    </nav>
+  </header>
+
+  <main class="admin-container">
+    <!-- Auth Barrier (Prompts if key not saved) -->
+    <div id="authPanel" class="glass-panel panel-card" style="max-width: 450px; margin: 3rem auto; text-align: center;">
+      <h2 style="margin-bottom: 0.5rem;">Admin Access</h2>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Enter the administrator key defined in <code>.env</code> (Default: <code>admin123</code>).
+      </p>
+      <div class="form-group">
+        <input type="password" id="adminKeyInput" placeholder="Admin API Key" value="admin123">
+      </div>
+      <button id="authBtn" class="btn btn-primary" style="width: 100%;">Unlock Admin Dashboard</button>
+    </div>
+
+    <!-- Main Dashboard Section -->
+    <div id="dashboardSection" style="display: none;">
+      <!-- Grid Row 1: Live Controls & Preview -->
+      <div class="grid-2">
+        <!-- Live Playback Controls -->
+        <div class="glass-panel panel-card">
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Live Slideshow Controls</h2>
+          <p style="color: var(--text-secondary); font-size: 0.85rem;">Manage currently playing slides and pending visitor queue.</p>
+
+          <div class="controls-row">
+            <button id="skipBtn" class="btn btn-secondary btn-sm">⏭️ Skip Slide</button>
+            <button id="pauseToggleBtn" class="btn btn-secondary btn-sm">⏸️ Pause</button>
+            <button id="clearQueueBtn" class="btn btn-danger btn-sm">🗑️ Clear Pending Queue</button>
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <label for="durationSlider">Slide Display Duration: <strong id="durationDisplay">6s</strong></label>
+            <input type="range" id="durationSlider" min="2" max="30" value="6" style="width: 100%; accent-color: var(--accent);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span>Fast (2s)</span>
+              <span>Default (6s)</span>
+              <span>Long (30s)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Status & TV Preview -->
+        <div class="glass-panel panel-card">
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Display Status</h2>
+          <div style="display: flex; gap: 1.5rem; margin-top: 1rem;">
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: var(--radius-md); flex: 1;">
+              <div style="color: var(--text-muted); font-size: 0.8rem;">Current Screen</div>
+              <div id="liveSlideVisitor" style="font-size: 1.15rem; font-weight: 700; color: #60a5fa; margin-top: 0.25rem;">Standby</div>
+              <div id="liveSlideMeta" style="font-size: 0.8rem; color: var(--text-secondary);">No active uploads</div>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: var(--radius-md); flex: 1;">
+              <div style="color: var(--text-muted); font-size: 0.8rem;">Pending Queue</div>
+              <div id="queueCountDisplay" style="font-size: 1.5rem; font-weight: 800; color: #34d399; margin-top: 0.25rem;">0</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">Batches waiting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos Moderation Grid -->
+      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700;">Uploaded Photos & Moderation</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">Instantly hide inappropriate photos from the live display.</p>
+          </div>
+          <button id="refreshPhotosBtn" class="btn btn-secondary btn-sm">🔄 Refresh Photos</button>
+        </div>
+
+        <div id="photosGrid" class="photo-grid">
+          <p style="color: var(--text-muted);">Loading photos...</p>
+        </div>
+      </div>
+
+      <!-- Visitor Directory Table -->
+      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700;">Registered Visitors Directory</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Identified visitors, visit frequencies, and consent records.</p>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Visitor Name</th>
+                <th>Identifier (Phone/Email)</th>
+                <th>Visits</th>
+                <th>Consent Status</th>
+                <th>First Visit</th>
+                <th>Latest Visit</th>
+              </tr>
+            </thead>
+            <tbody id="visitorsTableBody">
+              <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading visitors...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Privacy Audit Log -->
+      <div class="glass-panel panel-card">
+        <h2 style="font-size: 1.25rem; font-weight: 700;">Privacy & Consent Audit Trail</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Immutable compliance log of consent grants, withdrawals, and takedowns.</p>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Visitor ID</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogsBody">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading audit logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

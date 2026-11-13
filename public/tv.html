@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart TV Display | Live Photo Slideshow</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background: black; overflow: hidden;">
+  <!-- TV Container -->
+  <div class="tv-container" id="tvContainer">
+    <!-- Blurred Background Ambient Layer -->
+    <div class="tv-background-blur" id="backgroundBlur"></div>
+
+    <!-- Active Slide Content Layer -->
+    <div class="tv-slide-wrapper">
+      <img id="slideImage" class="tv-slide-image" alt="Slideshow photo" style="display: none;">
+
+      <!-- Standby / Ambient QR Card (Shown when no photos exist) -->
+      <div id="standbyCard" class="glass-panel tv-standby-card" style="display: none; z-index: 5;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📸</div>
+        <h1 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">
+          Welcome to the Event!
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 420px; margin: 0 auto 1.5rem;">
+          Scan the QR code with your smartphone camera to upload and see your photos live on this screen.
+        </p>
+        <img id="qrCodeImg" class="tv-qr-image" alt="Scan QR Code to Upload">
+        <p id="qrUrlText" style="color: #60a5fa; font-weight: 600; font-size: 0.95rem;"></p>
+      </div>
+    </div>
+
+    <!-- Top Left: Live Status & Venue Tag -->
+    <div class="tv-overlay-top-left">
+      <div class="tv-live-pill">
+        <div class="tv-live-dot"></div>
+        <span>Live Display</span>
+      </div>
+      <button id="fullscreenBtn" class="tv-fs-btn" title="Toggle Fullscreen (F11)">⛶ Fullscreen</button>
+      <button id="audioToggleBtn" class="tv-fs-btn" title="Toggle Sound Chime">🔔 Sound: Off</button>
+    </div>
+
+    <!-- Top Right: Up Next Queue Status -->
+    <div class="tv-overlay-top-right">
+      <div id="upNextPill" class="tv-up-next-pill" style="display: none;">
+        <span>Up Next: <strong id="upNextText"></strong></span>
+      </div>
+    </div>
+
+    <!-- Bottom Overlay: Visitor Info & Progress -->
+    <div class="tv-overlay-bottom" id="bottomOverlay" style="display: none;">
+      <div class="tv-visitor-card">
+        <h2 id="visitorNameHeading">
+          <span id="visitorNameText">Visitor</span>
+          <span id="returningBadge" class="tv-badge-returning" style="display: none;">⭐ Returning Visitor</span>
+          <span id="slideTypeBadge" class="tv-badge-slide-type">New Photo</span>
+        </h2>
+        <div class="tv-meta-info">
+          <span id="slideCounterText">Photo 1 of 1</span>
+          <span>•</span>
+          <span id="sessionDetailsText">Uploaded just now</span>
+        </div>
+      </div>
+
+      <!-- Slide Duration Progress Bar -->
+      <div style="text-align: right;">
+        <div class="tv-progress-container">
+          <div id="progressBar" class="tv-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Celebration Arrival Banner (Pops up when a new visitor batch starts) -->
+    <div id="celebrationBanner" style="display: none; position: absolute; top: 30%; z-index: 100; text-align: center; width: 100%; pointer-events: none; animation: popIn 0.5s ease;">
+      <div style="display: inline-block; background: rgba(15, 23, 42, 0.95); border: 2px solid #3b82f6; box-shadow: 0 0 50px rgba(59, 130, 246, 0.6); padding: 1.5rem 3rem; border-radius: 20px;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">✨</div>
+        <h1 id="celebrationTitle" style="color: white; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem;"></h1>
+        <p id="celebrationSubtitle" style="color: #93c5fd; font-size: 1.2rem; font-weight: 600;"></p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/tv.js"></script>
+</body>
+</html>
