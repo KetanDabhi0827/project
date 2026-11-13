@@ -9,6 +9,7 @@ const dashboardSection = document.getElementById('dashboardSection');
 const adminKeyInput = document.getElementById('adminKeyInput');
 const authBtn = document.getElementById('authBtn');
 
+const prevBtn = document.getElementById('prevBtn');
 const skipBtn = document.getElementById('skipBtn');
 const pauseToggleBtn = document.getElementById('pauseToggleBtn');
 const clearQueueBtn = document.getElementById('clearQueueBtn');
@@ -210,6 +211,13 @@ async function loadAuditLogs() {
 }
 
 // 4. Playback Controls
+prevBtn.addEventListener('click', async () => {
+  await fetch('/api/admin/prev', {
+    method: 'POST',
+    headers: { 'x-admin-key': adminKey },
+  });
+});
+
 skipBtn.addEventListener('click', async () => {
   await fetch('/api/admin/skip', {
     method: 'POST',

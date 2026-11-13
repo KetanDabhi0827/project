@@ -88,6 +88,14 @@ router.post('/skip', (req, res) => {
 });
 
 /**
+ * POST /api/admin/prev
+ */
+router.post('/prev', (req, res) => {
+  queueService.prev();
+  res.json({ success: true, message: 'Returned to previous slide.' });
+});
+
+/**
  * POST /api/admin/pause
  */
 router.post('/pause', (req, res) => {

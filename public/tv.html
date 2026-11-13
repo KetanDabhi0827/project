@@ -6,15 +6,16 @@
   <title>Smart TV Display | Live Photo Slideshow</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body style="background: black; overflow: hidden;">
+<body style="background: black; overflow: hidden; user-select: none;">
   <!-- TV Container -->
   <div class="tv-container" id="tvContainer">
     <!-- Blurred Background Ambient Layer -->
     <div class="tv-background-blur" id="backgroundBlur"></div>
 
-    <!-- Active Slide Content Layer -->
+    <!-- Active Slide Content Layer (Dual Image Buffer for Flawless Crossfade) -->
     <div class="tv-slide-wrapper">
-      <img id="slideImage" class="tv-slide-image" alt="Slideshow photo" style="display: none;">
+      <img id="slideImageA" class="tv-slide-image" alt="Slideshow photo A">
+      <img id="slideImageB" class="tv-slide-image" alt="Slideshow photo B">
 
       <!-- Standby / Ambient QR Card (Shown when no photos exist) -->
       <div id="standbyCard" class="glass-panel tv-standby-card" style="display: none; z-index: 5;">
@@ -22,7 +23,7 @@
         <h1 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">
           Welcome to the Event!
         </h1>
-        <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 420px; margin: 0 auto 1.5rem;">
+        <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 440px; margin: 0 auto 1.5rem;">
           Scan the QR code with your smartphone camera to upload and see your photos live on this screen.
         </p>
         <img id="qrCodeImg" class="tv-qr-image" alt="Scan QR Code to Upload">
@@ -47,6 +48,22 @@
       </div>
     </div>
 
+    <!-- Floating Interactive Control Bar (Auto-hides on idle, appears on mouse move / remote touch) -->
+    <div class="tv-control-bar" id="tvControlBar">
+      <button id="tvPrevBtn" class="tv-ctrl-btn" title="Previous Slide (← Left Arrow)">⏮</button>
+      <button id="tvPlayPauseBtn" class="tv-ctrl-btn" title="Play / Pause (Spacebar / P)">⏸</button>
+      <button id="tvNextBtn" class="tv-ctrl-btn" title="Next Slide (→ Right Arrow)">⏭</button>
+
+      <div class="tv-speed-selector" title="Change slide duration">
+        <span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 0.2rem;">⏱️ Speed:</span>
+        <button class="tv-speed-chip" data-speed="3">3s</button>
+        <button class="tv-speed-chip active" data-speed="6">6s</button>
+        <button class="tv-speed-chip" data-speed="10">10s</button>
+      </div>
+
+      <button id="tvRefreshBtn" class="tv-ctrl-btn" title="Refresh Reel">🔄</button>
+    </div>
+
     <!-- Bottom Overlay: Visitor Info & Progress -->
     <div class="tv-overlay-bottom" id="bottomOverlay" style="display: none;">
       <div class="tv-visitor-card">
@@ -66,6 +83,9 @@
       <div style="text-align: right;">
         <div class="tv-progress-container">
           <div id="progressBar" class="tv-progress-bar"></div>
+        </div>
+        <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); margin-top: 0.3rem;">
+          Press <kbd style="background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px;">→</kbd> or <kbd style="background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px;">Space</kbd> to skip
         </div>
       </div>
     </div>

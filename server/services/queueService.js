@@ -200,15 +200,33 @@ class QueueService extends EventEmitter {
     }
   }
 
+  prev() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+
+    if (this.currentBatch) {
+      if (this.currentBatch.currentSlideIndex > 0) {
+        this.currentBatch.currentSlideIndex -= 1;
+        this.playCurrentBatchSlide();
+      } else {
+        this.playCurrentBatchSlide();
+      }
+    } else if (this.ambientPhotos && this.ambientPhotos.length > 0) {
+      this.ambientIndex = (this.ambientIndex - 2 + this.ambientPhotos.length) % this.ambientPhotos.length;
+      this.playAmbientSlide();
+    }
+  }
+
   async playAmbientSlide() {
     if (this.ambientTimer) {
       clearTimeout(this.ambientTimer);
       this.ambientTimer = null;
     }
 
-    if (this.ambientPhotos.length === 0) {
-      await this.refreshAmbientReel();
-    }
+    // Refresh ambient reel to ensure any newly uploaded photos are included
+    await this.refreshAmbientReel();
 
     if (this.ambientPhotos.length > 0) {
       const photo = this.ambientPhotos[this.ambientIndex % this.ambientPhotos.length];
@@ -235,7 +253,7 @@ class QueueService extends EventEmitter {
         }, config.ambientLoopDurationSeconds * 1000);
       }
     } else {
-      // Empty state (no photos yet)
+      // Standby state (no photos in database yet)
       this.currentSlide = {
         isStandby: true,
         isAmbient: true,
@@ -244,6 +262,15 @@ class QueueService extends EventEmitter {
         timestamp: Date.now(),
       };
       this.emit('slide-change', this.currentSlide);
+
+      // Periodically poll database in case a photo was just added
+      if (!this.isPaused && !this.currentBatch) {
+        this.ambientTimer = setTimeout(() => {
+          if (!this.currentBatch) {
+            this.playAmbientSlide();
+          }
+        }, 4000);
+      }
     }
   }
 

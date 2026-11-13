@@ -20,8 +20,8 @@ npm test
 | :--- | :--- | :---: | :---: |
 | `tests/visitor.test.js` | Visitor identity resolution, PIN generation, returning visits, consent purge | 6 | ✅ PASS |
 | `tests/upload.test.js` | Multer validation, file type checks, consent requirements, returning visitor photo stitching | 5 | ✅ PASS |
-| `tests/queue.test.js` | Display queue state machine, concurrent upload FIFO ordering, starvation prevention, photo moderation | 5 | ✅ PASS |
-| **Total** | **All Critical Modules** | **16** | **100% PASS** |
+| `tests/queue.test.js` | Display queue state machine, concurrent upload FIFO ordering, starvation prevention, photo moderation, prev step | 6 | ✅ PASS |
+| **Total** | **All Critical Modules** | **17** | **100% PASS** |
 
 ---
 

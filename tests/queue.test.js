@@ -130,4 +130,22 @@ describe('Slideshow Queue & Concurrency Management', () => {
     expect(queueService.currentSlide.id).toBe('good-photo');
     expect(queueService.currentBatch.slides.find((s) => s.id === 'flagged-photo')).toBeUndefined();
   });
+
+  test('should step backward to previous slide when prev() is called', () => {
+    queueService.enqueueBatch({
+      visitor: { id: 'v1', name: 'Diana Prince' },
+      newPhotos: [
+        { id: 'p1', url: '/uploads/p1.jpg' },
+        { id: 'p2', url: '/uploads/p2.jpg' },
+      ],
+      pastPhotos: [],
+    });
+
+    expect(queueService.currentSlide.id).toBe('p1');
+    queueService.next();
+    expect(queueService.currentSlide.id).toBe('p2');
+
+    queueService.prev();
+    expect(queueService.currentSlide.id).toBe('p1');
+  });
 });

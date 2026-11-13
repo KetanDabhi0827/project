@@ -67,4 +67,34 @@ router.post('/next', (req, res) => {
   res.json({ success: true, ...queueService.getQueueSummary() });
 });
 
+/**
+ * POST /api/slideshow/prev
+ * Steps backward to the previous slide manually.
+ */
+router.post('/prev', (req, res) => {
+  queueService.prev();
+  res.json({ success: true, ...queueService.getQueueSummary() });
+});
+
+/**
+ * POST /api/slideshow/toggle-pause
+ */
+router.post('/toggle-pause', (req, res) => {
+  if (queueService.isPaused) {
+    queueService.resume();
+  } else {
+    queueService.pause();
+  }
+  res.json({ success: true, isPaused: queueService.isPaused });
+});
+
+/**
+ * POST /api/slideshow/duration
+ */
+router.post('/duration', (req, res) => {
+  const { seconds } = req.body;
+  const newDuration = queueService.setSlideDuration(seconds);
+  res.json({ success: true, slideDuration: newDuration });
+});
+
 module.exports = router;
