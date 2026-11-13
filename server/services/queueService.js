@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const uuidv4 = () => crypto.randomUUID();
 const config = require('../config');
 const photoService = require('./photoService');
 

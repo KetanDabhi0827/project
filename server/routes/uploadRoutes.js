@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const uuidv4 = () => crypto.randomUUID();
 const upload = require('../middlewares/upload');
 const visitorService = require('../services/visitorService');
 const photoService = require('../services/photoService');
