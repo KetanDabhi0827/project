@@ -19,6 +19,20 @@ function initSocket(httpServer) {
       socket.emit('slideshow:state', queueService.getQueueSummary());
     });
 
+    socket.on('slideshow:send-reaction', (data) => {
+      const allowedEmojis = ['❤️', '🔥', '🎉', '👏', '🤩', '📸', '✨', '😍'];
+      const emoji = data && data.emoji;
+      if (allowedEmojis.includes(emoji)) {
+        const payload = {
+          emoji,
+          xPos: Math.floor(Math.random() * 80) + 10,
+          id: Math.random().toString(36).substring(2, 9),
+          timestamp: Date.now(),
+        };
+        io.emit('slideshow:reaction', payload);
+      }
+    });
+
     socket.on('disconnect', () => {
       // Clean disconnect
     });
@@ -68,7 +82,24 @@ function getIO() {
   return io;
 }
 
+function broadcastReaction(emoji) {
+  if (!io) return null;
+  const allowedEmojis = ['❤️', '🔥', '🎉', '👏', '🤩', '📸', '✨', '😍'];
+  if (allowedEmojis.includes(emoji)) {
+    const payload = {
+      emoji,
+      xPos: Math.floor(Math.random() * 80) + 10,
+      id: Math.random().toString(36).substring(2, 9),
+      timestamp: Date.now(),
+    };
+    io.emit('slideshow:reaction', payload);
+    return payload;
+  }
+  return null;
+}
+
 module.exports = {
   initSocket,
   getIO,
+  broadcastReaction,
 };

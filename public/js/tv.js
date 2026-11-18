@@ -442,3 +442,46 @@ socket.on('slideshow:state', (state) => {
     });
   }
 });
+
+// Live Floating Emoji Reactions
+const tvReactionsLayer = document.getElementById('tvReactionsLayer');
+
+function triggerFloatingEmoji(emoji, xPos) {
+  if (!tvReactionsLayer) return;
+  const el = document.createElement('div');
+  el.className = 'floating-emoji';
+  el.textContent = emoji;
+  const safeX = xPos || (Math.floor(Math.random() * 75) + 12);
+  el.style.left = `${safeX}%`;
+  tvReactionsLayer.appendChild(el);
+
+  // Subtle pop chime when reaction arrives (if sound enabled)
+  if (soundEnabled && audioCtx) {
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      const now = audioCtx.currentTime;
+      osc.frequency.setValueAtTime(450 + Math.random() * 250, now);
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.exponentialRampToValueAtTime(0.1, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    } catch (e) {}
+  }
+
+  setTimeout(() => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  }, 3300);
+}
+
+socket.on('slideshow:reaction', (data) => {
+  if (data && data.emoji) {
+    triggerFloatingEmoji(data.emoji, data.xPos);
+  }
+});

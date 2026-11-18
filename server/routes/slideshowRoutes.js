@@ -89,12 +89,18 @@ router.post('/toggle-pause', (req, res) => {
 });
 
 /**
- * POST /api/slideshow/duration
+ * POST /api/slideshow/react
+ * Broadcasts an emoji reaction from audience phones to the TV screen
  */
-router.post('/duration', (req, res) => {
-  const { seconds } = req.body;
-  const newDuration = queueService.setSlideDuration(seconds);
-  res.json({ success: true, slideDuration: newDuration });
+router.post('/react', (req, res) => {
+  const { emoji } = req.body;
+  const socketService = require('../services/socketService');
+  const payload = socketService.broadcastReaction(emoji);
+  if (payload) {
+    res.json({ success: true, reaction: payload });
+  } else {
+    res.status(400).json({ success: false, error: 'Invalid or unsupported emoji.' });
+  }
 });
 
 module.exports = router;

@@ -331,3 +331,24 @@ withdrawForm.addEventListener('submit', async (e) => {
     withdrawBtn.textContent = '🗑️ Delete All My Photos & Revoke Consent';
   }
 });
+
+// Live Reaction Bar Handler
+const reactionButtons = document.querySelectorAll('.reaction-btn');
+reactionButtons.forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const emoji = btn.getAttribute('data-emoji');
+    btn.style.transform = 'scale(1.35)';
+    setTimeout(() => { btn.style.transform = ''; }, 180);
+
+    try {
+      await fetch('/api/slideshow/react', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji }),
+      });
+      showToast(`Sent ${emoji} to the big screen!`);
+    } catch (err) {
+      console.warn('Reaction error:', err);
+    }
+  });
+});
