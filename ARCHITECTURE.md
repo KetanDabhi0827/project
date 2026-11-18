@@ -6,21 +6,22 @@ This document details the architectural design, stack choices, data model, and c
 
 ## 1. System Architecture Overview
 
-The system is designed around an event-driven, real-time client-server architecture capable of supporting low-latency Smart TV synchronization, mobile visitor uploads, and administrative moderation simultaneously.
+The system is designed around an event-driven, real-time client-server architecture capable of supporting low-latency Smart TV synchronization, mobile visitor uploads, audience live reactions, and administrative moderation simultaneously.
 
 ```mermaid
 flowchart TD
     subgraph Clients["Client Layer"]
-        Mobile["📱 Mobile Visitor Portal<br/>(/index.html)"]
-        SmartTV["📺 Smart TV / Display Screen<br/>(/tv.html)"]
-        Admin["💻 Moderator Dashboard<br/>(/admin.html)"]
+        Mobile["📱 Mobile Visitor Portal<br/>(/index.html)<br/>Uploads, Digital Pass, Reactions"]
+        SmartTV["📺 Smart TV / Display Screen<br/>(/tv.html)<br/>Dual-Buffer Crossfade & Controls"]
+        Admin["💻 Moderator Dashboard<br/>(/admin.html)<br/>Branding Customizer & Takedown"]
     end
 
-    subgraph Server["Server Layer (Node.js & Express)"]
-        HTTPRouter["REST API Router<br/>(/api/upload, /api/visitors, /api/admin)"]
-        SocketServer["Socket.IO WebSocket Server<br/>(Bidirectional Real-Time Sync)"]
+    subgraph Server["Server Layer (Node.js & Express 5)"]
+        HTTPRouter["REST API Router<br/>(/api/upload, /api/visitors, /api/slideshow, /api/admin)"]
+        SocketServer["Socket.IO WebSocket Server<br/>(Bidirectional Real-Time Sync & Reactions)"]
         QueueManager["DisplayQueueManager<br/>(FIFO Queue & Starvation Capping)"]
         VisitorEngine["Visitor & Identity Service<br/>(Normalization & History Matching)"]
+        AIService["AI Service & Safety Guard<br/>(Binary Inspection & Greetings)"]
         MulterEngine["Multer File Validator<br/>(MIME & Size Enforcement)"]
     end
 
@@ -29,14 +30,20 @@ flowchart TD
         DiskStorage["Local File Storage<br/>(public/uploads/)"]
     end
 
+    subgraph Container["Containerization Layer"]
+        Docker["🐳 Docker & Docker Compose<br/>(Isolated runtime & Volume mounts)"]
+    end
+
     Mobile -->|"HTTP POST (Multipart Upload)"| HTTPRouter
     Mobile -->|"HTTP POST (/api/visitors/identify)"| HTTPRouter
-    Admin -->|"HTTP GET/POST (Controls & Moderation)"| HTTPRouter
+    Mobile -->|"Socket.IO / HTTP POST (Reactions ❤️🔥🎉)"| HTTPRouter
+    Admin -->|"HTTP GET/POST (Controls & Branding)"| HTTPRouter
     Admin <-->|"WebSocket (Live Status & Queue Sync)"| SocketServer
-    SmartTV <-->|"WebSocket (Slide Changes & New Arrivals)"| SocketServer
+    SmartTV <-->|"WebSocket (Slide Changes, Reactions, Branding)"| SocketServer
 
     HTTPRouter --> MulterEngine
     MulterEngine -->|"Store UUID Images"| DiskStorage
+    HTTPRouter --> AIService
     HTTPRouter --> VisitorEngine
     VisitorEngine <--> SQLite
     HTTPRouter --> QueueManager
@@ -54,9 +61,12 @@ flowchart TD
 | **Real-time Protocol** | **Socket.IO (v4)** | Provides low-latency, bidirectional WebSocket communication with automatic HTTP long-polling fallback, essential for embedded smart TV web browsers. |
 | **Database** | **SQLite (via sqlite3 with WAL)** | Zero-configuration, serverless relational database stored as a single file. Configured with **Write-Ahead Logging (WAL)** to support concurrent reads and writes during simultaneous visitor uploads. |
 | **File Handling** | **Multer** | Streaming multipart/form-data processor enforcing strict MIME verification, max file count (5), and max byte limits (10MB) before writing to disk. |
+| **AI Intelligence** | **AIService (Offline Heuristic & NLP)** | Heuristic binary signature detector (blocks disguised PE/ELF executables and embedded XSS scripts) and time-aware greeting generator without high-latency external cloud APIs. |
+| **Smart TV Engine** | **Dual-Buffer Crossfade DOM Engine** | Two alternating DOM image layers eliminate black-screen flash and prevent image rendering freezes on low-memory Smart TV web browsers. |
+| **Audience Engagement** | **Live WebSockets & Web Audio** | Instant emoji balloon animations and synthesized Web Audio pops across TV screens without downloading external audio files. |
 | **Frontend Clients** | **Modern Vanilla Web (HTML5/CSS3/ES6)** | **Zero-build setup**: No complex Webpack, Babel, or compilation required for evaluators. Extremely lightweight, fast to load on resource-constrained Smart TVs and mobile browsers. |
-| **Styling & Effects** | **CSS3 Glassmorphism & Animations** | Native CSS Ken Burns pan-zoom, cross-fade transitions, responsive grid layouts, and countdown progress bars without heavy JavaScript UI libraries. |
-| **Testing** | **Jest & Supertest** | Comprehensive automated unit and integration testing covering visitor resolution, queue scheduling, and HTTP endpoints. |
+| **Containerization** | **Docker & Docker Compose** | Multi-stage alpine image with persistent volume mapping for `./data` and `./public/uploads`. |
+| **Testing** | **Jest & Supertest** | 22 comprehensive automated tests covering AI validation, visitor resolution, queue scheduling, and HTTP endpoints. |
 
 ---
 
@@ -105,8 +115,8 @@ erDiagram
     }
 
     SLIDESHOW_SETTINGS {
-        string key PK "e.g. slide_duration"
-        string value "e.g. 6"
+        string key PK "e.g. event_name, theme_color, transition_effect"
+        string value "e.g. 'Annual Gala', 'theme-purple', 'transition-kenburns'"
     }
 ```
 
@@ -115,7 +125,7 @@ erDiagram
 1. **`visitors`**: Stores recognized attendees. Unique composite index on `(normalized_name, identifier)` guarantees deterministic identity matching.
 2. **`photos`**: Stores metadata and file pointers for all uploaded media. Soft-deletion flag `is_active` enables instant moderation without corrupting history.
 3. **`consent_logs`**: Immutable audit trail recording every privacy lifecycle action for compliance verification.
-4. **`slideshow_settings`**: Key-value persistence for runtime parameters (e.g. slide duration).
+4. **`slideshow_settings`**: Persistent key-value configuration for event branding, themes, transitions, and slide timing.
 
 ---
 
@@ -128,31 +138,36 @@ sequenceDiagram
     autonumber
     actor Visitor as 📱 Returning Visitor
     participant Server as ⚙️ Express & Multer
+    participant AI as 🤖 AIService
     participant DB as 🗄️ SQLite Database
     participant Queue as 📋 DisplayQueueManager
     participant TV as 📺 Smart TV Screen
 
     Visitor->>Server: POST /api/upload (Name, Phone, Consent, Photos)
     Server->>Server: Validate MIME (image/*) & size (<10MB)
+    Server->>AI: analyzePhotoSafety(file.path)
+    AI-->>Server: Approved (isSafe: true)
     Server->>DB: Query visitor by normalized (Name, Phone)
     DB-->>Server: Existing visitor found (visit_count: 2)
     Server->>DB: UPDATE visitors SET visit_count = 3
     Server->>DB: INSERT INTO photos (New photos with 24h expiration)
     Server->>DB: SELECT past photos WHERE visitor_id = X
     DB-->>Server: 2 past photos retrieved
-    Server->>Queue: enqueueBatch(Visitor, 2 Past + 1 New Photo)
+    Server->>AI: generateWelcomeGreeting(Visitor, 1 New, 2 Past)
+    AI-->>Server: "Welcome back, Alice! Reliving 2 golden memories..."
+    Server->>Queue: enqueueBatch(Visitor, 2 Past + 1 New Photo, greeting)
     
     alt TV Display is Idle / Playing Ambient
-        Queue->>TV: WS Emit "slideshow:visitor-arrived" (Celebration banner)
+        Queue->>TV: WS Emit "slideshow:visitor-arrived" (Banner + AI Greeting)
         Queue->>TV: WS Emit "slideshow:slide-change" (Slide 1: Past Photo)
-        TV->>TV: Play Ken Burns effect & Audio Chime
+        TV->>TV: Crossfade Buffer A/B & play Web Audio chime
     else TV Display is Currently Playing Another Visitor
         Queue->>Queue: Push to pendingQueue (FIFO)
         Queue->>TV: WS Emit "slideshow:queue-update" (Up Next: Alice +1)
         TV->>TV: Render floating "Up Next" pill
     end
 
-    Server-->>Visitor: 201 Created (PIN, Status, Confirmation)
+    Server-->>Visitor: 201 Created (PIN, Digital Pass QR, Status, Greeting)
 ```
 
 ---
@@ -169,7 +184,7 @@ stateDiagram-v2
     AmbientReel --> ActivePlaying: New visitor upload arrives
 
     state ActivePlaying {
-        [*] --> VisitorArrivalCelebration: Banner displayed (2.8s)
+        [*] --> VisitorArrivalCelebration: Banner displayed (3.5s)
         VisitorArrivalCelebration --> DisplayPastPhotos: If returning visitor
         DisplayPastPhotos --> DisplayNewPhotos: All past photos shown
         DisplayNewPhotos --> CheckPendingQueue: Current batch finished
@@ -183,6 +198,6 @@ stateDiagram-v2
 
 ### Key Queue Invariants
 1. **FIFO Fairness:** Batches are dequeued in the exact order they finished uploading.
-2. **Atomic Advancement:** Calling `next()` or expiration of the slide timer cleanly advances the index.
+2. **Dual-Buffer Stability:** Even during heavy network traffic, the display relies on client-side fail-safe auto-advancement (`duration + 1.5s`) so the TV never freezes on a slide.
 3. **Instant Moderation Propagation:** If an administrator or visitor deletes photo $X$, the queue removes $X$ immediately from active memory, advancing to the subsequent slide in $< 200\text{ms}$.
-4. **Ambient Fallback:** When the queue reaches zero items, the display never goes black; it smoothly transitions to an ambient reel of approved past photos or the standby QR code card.
+4. **Ambient Fallback:** When the queue reaches zero items, the display smoothly transitions to an ambient reel of approved past photos or the standby QR code card.

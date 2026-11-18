@@ -19,8 +19,9 @@ However, real-world events involve multiple guests sharing the same first name (
    - If recognized, a welcoming banner appears: *"Welcome back, Alice Walker! We found 2 past photo(s) from your previous visit."*
 3. **Visitor Choice & Control:**  
    - We assume returning visitors may not want *every* historical photo shown again. We provide an explicit toggle: *"Include past photos in this slideshow session"* (enabled by default) and display preview thumbnails so the visitor has full situational awareness before uploading.
-4. **Identity Protection via 4-Digit PIN:**  
-   - Upon first submission, a lightweight 4-digit PIN is issued (or chosen by the visitor). This PIN acts as a lightweight management token to prevent malicious parties from impersonating a visitor to delete or manipulate their photos.
+4. **Identity Protection via 4-Digit PIN & Digital Pass:**  
+   - Upon first submission, a lightweight 4-digit PIN is issued. This PIN acts as a lightweight management token to prevent malicious parties from impersonating a visitor to delete or manipulate their photos.
+   - Visitors receive a generated **Digital Event Pass QR code** which allows instant re-identification on subsequent visits without retyping credentials.
 
 ---
 
@@ -64,6 +65,8 @@ The specification requires: *"File validation, upload size limits, and what happ
    - Enforced both client-side (instant browser alert) and server-side (Multer `limits`).
 3. **Safe Storage & Sanitization:**  
    - Original filenames (e.g., `../../../evil.jpg`) are discarded. Files are renamed using cryptographic UUIDs (`photo-${uuidv4()}.jpg`) to eliminate path traversal vulnerabilities and collision overwrites.
+4. **AI Deep Payload Inspection:**  
+   - In addition to MIME checks, every uploaded buffer undergoes heuristic binary inspection for disguised executable headers (`MZ`, `ELF`) and polyglot embedded script tags (`<script>`, `<?php>`, `eval()`) to prevent image-based attacks.
 
 #### B. Concurrent Uploads & Queue Scheduling (What happens when several people upload at once?)
 1. **Asynchronous I/O Processing:**  
@@ -86,13 +89,30 @@ The specification requires: *"File validation, upload size limits, and what happ
 The specification requires: *"As soon as an upload completes, the photo plays in a slideshow for a specific duration on a smart TV or computer display."*
 
 ### Our Solution & Assumptions
-1. **Display Duration:**  
+1. **Dual-Buffer Crossfading & Freeze Prevention:**  
+   - Low-powered Smart TV browsers often freeze or flash black during image reloads. We implement two alternating DOM buffer layers (`#slideImageA` and `#slideImageB`) with crossfade opacity and a client-side fail-safe auto-advance timer (`duration + 1.5s`) so the TV display never halts even during transient network disconnects.
+2. **Display Duration & Speed Controls:**  
    - Default slide duration is set to **6 seconds** (`SLIDESHOW_DURATION_SECONDS=6`).
-   - Administrators can adjust the duration on-the-fly between 2 seconds and 30 seconds via the Admin Console slider, broadcast live to all screens via WebSockets.
-2. **Ambient Mode vs. Active Mode:**  
+   - On-screen floating controls (`⏮`, `⏸/▶️`, `⏭`, `3s/6s/10s` speed chips) allow organizers to adjust playback directly with a TV remote, mouse, or touch screen.
+3. **Ambient Mode vs. Active Mode:**  
    - **Active Mode:** When visitor uploads exist, photos play with animated visitor cards, slide counter (`Photo 1 of 3`), and a live timer progress bar.
    - **Ambient Mode:** When the queue empties, the screen seamlessly transitions to an ambient reel of past event photos or a high-contrast QR code standby screen inviting new guests to scan and upload.
-3. **Celebration Announcement Card:**  
-   - When a new visitor's batch begins, an animated banner pops up on screen for 2.8 seconds:  
-     *"Welcome Back, Alex! (Visit #3) - Playing 2 past photos + 1 new photo"*.
+4. **Celebration Announcement Banner & AI Personalized Greetings:**  
+   - When a new visitor's batch begins, an animated banner pops up on screen with an AI-generated personalized greeting tailored to the time of day and visit history:  
+     *"Welcome Back, Alex! Thrilled to feature your journey across 3 visits! 🌟"*.
    - If enabled on the TV, an audio chime (synthesized via the browser's Web Audio API, requiring zero audio downloads) rings to alert attendees in the room.
+
+---
+
+## 5. Live Audience Reactions & Dynamic Event Branding
+
+### The Assumptions & Design Choices
+1. **Audience Live Emoji Reactions:**  
+   - Attendees watching the TV slideshow can tap interactive emoji reactions (❤️, 🔥, 🎉, 👏, ⭐) directly from the mobile interface.
+   - Reactions are broadcasted in real time via WebSockets (`slideshow:reaction`) without persistent database storage to avoid database write bloat.
+   - Smart TVs render floating animated bubble balloons with Web Audio synthesized pops.
+2. **Dynamic Event Branding:**  
+   - Organizers can rebrand the event name, tagline, color themes (Blue, Purple, Emerald, Rose, Amber), and transition animations directly from `/admin.html`.
+   - Settings are stored in `slideshow_settings` and synchronized across all connected TVs in real time.
+3. **Containerized Deployment:**  
+   - The application is containerized with Docker using multi-stage builds and persistent bind-mount volumes for SQLite data and uploaded photos, guaranteeing that data survives container updates.

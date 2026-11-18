@@ -6,7 +6,7 @@ This document outlines both the automated test suites and the comprehensive manu
 
 ## 1. Automated Test Suites
 
-The project uses [Jest](https://jestjs.io/) and [Supertest](https://github.com/ladjs/supertest) for unit and integration testing across core business logic and HTTP endpoints.
+The project uses [Jest](https://jestjs.io/) and [Supertest](https://github.com/ladjs/supertest) for unit and integration testing across core business logic, AI safety, and HTTP endpoints.
 
 ### Running Automated Tests
 ```bash
@@ -18,10 +18,11 @@ npm test
 
 | Test File | Focus Area | Tests Executed | Status |
 | :--- | :--- | :---: | :---: |
+| `tests/ai.test.js` | AI safety inspection, binary executable & script blocking, personalized greetings | 5 | ✅ PASS |
 | `tests/visitor.test.js` | Visitor identity resolution, PIN generation, returning visits, consent purge | 6 | ✅ PASS |
 | `tests/upload.test.js` | Multer validation, file type checks, consent requirements, returning visitor photo stitching | 5 | ✅ PASS |
 | `tests/queue.test.js` | Display queue state machine, concurrent upload FIFO ordering, starvation prevention, photo moderation, prev step | 6 | ✅ PASS |
-| **Total** | **All Critical Modules** | **17** | **100% PASS** |
+| **Total** | **All Critical Modules** | **22** | **100% PASS** |
 
 ---
 
@@ -39,10 +40,10 @@ The following test scenarios were executed manually to verify end-to-end user fl
   4. Check the mandatory display consent box.
   5. Click **"Upload & Play on TV"**.
 * **Expected Result:**
-  - Visitor receives immediate confirmation showing their 4-digit deletion PIN.
+  - Visitor receives immediate confirmation showing their 4-digit deletion PIN and personalized AI greeting.
   - Smart TV immediately receives WebSocket event `slideshow:visitor-arrived`.
   - Celebration banner appears: *"Welcome, Alice Walker! Playing 2 new photo(s)"*.
-  - TV screen displays Photo 1 with Ken Burns zoom, visitor name card, slide counter (1 of 2), and timer progress bar.
+  - TV screen displays Photo 1 with dual-buffer crossfade, visitor name card, slide counter (1 of 2), and timer progress bar.
 * **Actual Result:** **PASS** (Zero latency display; WebSocket event delivered instantly).
 
 ---
@@ -86,7 +87,7 @@ The following test scenarios were executed manually to verify end-to-end user fl
 ### Test Case 4: File Validation and Upload Limits
 * **Objective:** Ensure invalid file types and excessive file sizes are rejected gracefully.
 * **Test Steps:**
-  1. Attempt to upload a `.txt` or `.exe` file renamed to `.jpg`.
+  1. Attempt to upload a `.txt` file renamed to `.jpg`.
   2. Attempt to upload a photo exceeding 10MB.
   3. Attempt to upload more than 5 photos at once.
   4. Attempt to submit the form without checking the consent box.
@@ -123,3 +124,51 @@ The following test scenarios were executed manually to verify end-to-end user fl
   - If any photo was in the active slideshow queue, it is immediately purged.
   - Audit log records `CONSENT_WITHDRAWN_PURGE`.
 * **Actual Result:** **PASS** (All photos removed; subsequent identify calls return zero past photos).
+
+---
+
+### Test Case 7: Live Audience Emoji Reactions
+* **Objective:** Verify viewers can send live reactions from mobile to the Smart TV.
+* **Test Steps:**
+  1. Open `http://localhost:3000/tv.html` on one screen.
+  2. Open mobile upload portal at `http://localhost:3000/` and tap the floating reaction emojis: ❤️, 🔥, 🎉.
+* **Expected Result:**
+  - Floating emoji balloons immediately animate upward across the TV screen.
+  - Web Audio API synthesizes a gentle pop sound for each reaction without loading external audio files.
+* **Actual Result:** **PASS** (Smooth 60fps animations on TV; instant delivery via WebSockets).
+
+---
+
+### Test Case 8: Dynamic Event Branding & Theme Switching
+* **Objective:** Verify event organizers can update colors and themes live without page reloads.
+* **Test Steps:**
+  1. Open `http://localhost:3000/admin.html` and scroll to the Event Branding panel.
+  2. Set Event Name: `"Grand Gala 2026"`, Theme: `"Emerald Mint"`, Transition: `"3D Perspective Flip"`.
+  3. Click **"Save & Apply Branding"**.
+* **Expected Result:**
+  - Connected TV screens update their header title immediately.
+  - CSS accent variables change to Emerald Mint across TV, Admin, and Upload portals.
+  - Slide transitions switch to 3D flip effect without reloading.
+* **Actual Result:** **PASS** (Synchronized instantly across all connected clients).
+
+---
+
+### Test Case 9: Digital Event Pass QR Generation
+* **Objective:** Verify returning visitors receive a scannable Digital Pass for fast check-in.
+* **Test Steps:**
+  1. Complete a photo upload at `http://localhost:3000/`.
+  2. In the success card, click **"🎫 View Digital Event Pass"**.
+* **Expected Result:**
+  - Modal reveals the visitor's personalized QR pass and check-in link.
+* **Actual Result:** **PASS** (Digital pass renders cleanly with visitor metadata).
+
+---
+
+### Test Case 10: AI Safety Filter Blocking Malicious Payloads
+* **Objective:** Ensure executable or polyglot files disguised as images are blocked by the AI safety analyzer.
+* **Test Steps:**
+  1. Attempt to upload a binary file with PE/MZ header or script injection payload.
+* **Expected Result:**
+  - AI Safety Filter intercepts the upload before database entry.
+  - Server deletes temporary files and returns HTTP 400: `Photo upload blocked by AI Safety Guard`.
+* **Actual Result:** **PASS** (Verified by automated unit tests in `tests/ai.test.js` and manual test).

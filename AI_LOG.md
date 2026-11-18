@@ -1,6 +1,6 @@
 # AI_LOG.md: Interaction Log & Prompt Engineering History
 
-This document chronicles key interactions, prompt directives, and design steering during the development of the **Visitor Photo Slideshow** application, highlighting **two specific cases where the AI made mistakes**, how they were detected, and how they were corrected.
+This document chronicles key interactions, prompt directives, and design steering during the development of the **Visitor Photo Slideshow** application, highlighting **specific cases where the AI made mistakes**, how they were detected, and how they were corrected.
 
 ---
 
@@ -74,7 +74,7 @@ This document chronicles key interactions, prompt directives, and design steerin
     await runAsync(db, 'DELETE FROM consent_logs');
   });
   ```
-  After adding table isolation and timer cleanup in `afterAll`, the test suite runs cleanly and deterministically on every single execution (`16 passed, 16 total`).
+  After adding table isolation and timer cleanup in `afterAll`, the test suite runs cleanly and deterministically on every single execution.
 
 ---
 
@@ -100,9 +100,47 @@ This document chronicles key interactions, prompt directives, and design steerin
 
 ---
 
-## Log Entry 7: Embedded Smart TV Compatibility & Zero-Dependency Audio
-* **Directive / Prompt:**  
-  > *"Smart TV web browsers (like Samsung Tizen or LG webOS) often have restricted memory and can fail when downloading external MP3 assets or running heavy frameworks."*
+## Log Entry 7: Case 3 — AI Mistake: Smart TV Slide Freeze & Transition Glitch
+* **User Directive (Gujarati):**  
+  > *"tvslideshow ma slide change anthi thati and thodu tamari rite change kari apo"*  
+  > *(The TV slideshow slides are not changing cleanly and sometimes freeze; improve and customize it.)*
+* **What the AI Did Wrong:**  
+  The initial Smart TV slideshow used a single DOM `<img>` tag and updated its `src` directly when the server sent `slideshow:slide-change`. On low-memory smart TV browsers or slow Wi-Fi connections, this caused:
+  1. A jarring black flash while the new image loaded.
+  2. If a network packet was dropped, the server timer expired without the TV receiving the next slide event, causing the TV to freeze indefinitely on the current image.
+* **How We Noticed:**  
+  User feedback during live testing on TV display confirmed the slide advancement stopped cycling under real network conditions.
+* **How We Fixed It:**  
+  1. Replaced the single-element image rendering with a **Dual-Buffer Crossfade Display Engine** (`#slideImageA` and `#slideImageB`), smoothly alternating opacity so the incoming photo preloads in the inactive buffer before crossfading.
+  2. Added a **client-side fail-safe auto-advance timer** (`(duration + 1.5) * 1000 ms`), guaranteeing the TV automatically polls and requests the next slide even if a WebSocket packet is delayed.
+  3. Added an **Interactive On-Screen TV Floating Controller Dock** (`⏮`, `⏸/▶️`, `⏭`, `3s/6s/10s` speed chips, `🔄`) with auto-hiding and TV remote navigation support (`Space`, `ArrowLeft`, `ArrowRight`, `P`, `F`).
+
+---
+
+## Log Entry 8: Live Audience Reactions & Dynamic Event Branding
+* **User Directive:**  
+  > *"ha step by step badha option add kari"*  
+  > *(Yes, add all proposed advanced options step by step.)*
 * **AI Implementation:**  
-  1. Frontend built with pure HTML5, CSS3, and ES6 JavaScript (no heavy virtual DOM overhead).
-  2. Implemented arrival sound chimes using the browser's native **Web Audio API** (`AudioContext` oscillator synthesis), generating a pleasant dual-tone chime dynamically with 0 external network requests or audio asset dependencies.
+  1. Built the **Live Audience Emoji Reactions Engine** (`POST /api/slideshow/react`, `slideshow:reaction` event), rendering floating helium balloons on the Smart TV with dynamic X-positions and synthesized Web Audio popping sounds.
+  2. Added the **Dynamic Event Branding Customizer** (`slideshow_settings` table, `POST /api/admin/settings`), providing 5 color theme palettes and 4 CSS transition effects (Ken Burns, 3D Flip, Zoom, Crossfade) that broadcast instantaneously across all screens.
+
+---
+
+## Log Entry 9: Returning Visitor Memory Lane Timeline & Digital Pass
+* **Directive / Prompt:**  
+  > *"Enrich returning visitor experience with historical timelines and contactless check-in."*
+* **AI Implementation:**  
+  1. Added relative and absolute memory date stamps (*"Memory from 18 Nov 2026"*) on past photos and a prominent visit details pill on the TV display.
+  2. Implemented the **Digital Event Pass QR endpoint** (`GET /api/visitors/:id/pass`), allowing attendees to save a personal QR pass on their phone to re-identify with a single scan.
+
+---
+
+## Log Entry 10: AI Smart Moderation & Production Dockerization
+* **Directive / Prompt:**  
+  > *"Add automated safety checks for uploaded images and prepare the application for containerized cloud deployment."*
+* **AI Implementation:**  
+  1. Created `server/services/aiService.js` with heuristic binary header checks (detecting disguised PE/ELF executables) and polyglot embedded script tags (`<script>`, `<?php>`, `eval()`), preventing malicious uploads before disk writes.
+  2. Added context-aware personalized AI arrival greetings generator tailored to time of day and returning visit counts.
+  3. Created multi-stage `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with persistent bind mounts for SQLite and uploaded media.
+  4. Expanded the Jest automated test suite to 22 passing tests.
