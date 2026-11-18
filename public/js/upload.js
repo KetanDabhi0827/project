@@ -163,8 +163,19 @@ function handleFilesSelected(newFiles) {
   renderPreviews();
 }
 
+const photoCountBadge = document.getElementById('photoCountBadge');
+
 function renderPreviews() {
   previewGrid.innerHTML = '';
+  if (photoCountBadge) {
+    if (selectedFiles.length > 0) {
+      photoCountBadge.style.display = 'inline-block';
+      photoCountBadge.textContent = `📸 ${selectedFiles.length} of 5 selected`;
+    } else {
+      photoCountBadge.style.display = 'none';
+    }
+  }
+
   selectedFiles.forEach((file, index) => {
     const item = document.createElement('div');
     item.className = 'preview-item';
@@ -246,6 +257,7 @@ uploadForm.addEventListener('submit', async (e) => {
     uploadForm.style.display = 'none';
     returningBanner.style.display = 'none';
     successCard.style.display = 'block';
+    successCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     successTitle.textContent = data.visitor.isReturning
       ? `Welcome Back, ${data.visitor.name}! 🚀`
@@ -288,6 +300,7 @@ uploadMoreBtn.addEventListener('click', () => {
   successCard.style.display = 'none';
   uploadForm.style.display = 'block';
   consentCheckbox.checked = true;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // Withdraw Consent & Delete Photos Handler
