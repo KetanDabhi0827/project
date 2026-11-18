@@ -25,6 +25,11 @@ const celebrationTitle = document.getElementById('celebrationTitle');
 const celebrationSubtitle = document.getElementById('celebrationSubtitle');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 const audioToggleBtn = document.getElementById('audioToggleBtn');
+const bgmAudio = document.getElementById('bgmAudio');
+const volumeSlider = document.getElementById('volumeSlider');
+const customBgmBtn = document.getElementById('customBgmBtn');
+const bgmFileInput = document.getElementById('bgmFileInput');
+const volumeIcon = document.getElementById('volumeIcon');
 
 // Interactive Control Bar
 const tvControlBar = document.getElementById('tvControlBar');
@@ -44,19 +49,137 @@ let currentDuration = 6;
 let soundEnabled = false;
 let audioCtx = null;
 let controlBarTimeout = null;
+let synthInterval = null;
+let synthGainNode = null;
+let synthNoteIndex = 0;
+const ambientScale = [261.63, 329.63, 392.00, 440.00, 523.25, 659.25]; // Warm C-major pentatonic
 
-// Audio Chime using Web Audio API (Zero external network requests)
+function ensureAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+// Immediate audio feedback chime when toggling Sound On / Off
+function playFeedbackTone(isTurnedOn) {
+  try {
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+
+    if (isTurnedOn) {
+      // Cheerful ascending 3-tone chime: E5 -> A5 -> C#6
+      osc.frequency.setValueAtTime(659.25, now);
+      osc.frequency.setValueAtTime(880.0, now + 0.12);
+      osc.frequency.setValueAtTime(1108.73, now + 0.24);
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.25, now + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.55);
+    } else {
+      // Gentle power-down tone: A4 -> F4
+      osc.frequency.setValueAtTime(440.0, now);
+      osc.frequency.setValueAtTime(349.23, now + 0.1);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    }
+  } catch (err) {
+    console.warn('Feedback tone error:', err);
+  }
+}
+
+// Built-in relaxing ambient melody generator (plays when no external MP3 is chosen)
+function startAmbientSynth() {
+  if (synthInterval || !soundEnabled) return;
+  const ctx = ensureAudioContext();
+  if (!ctx) return;
+
+  synthGainNode = ctx.createGain();
+  const currentVol = (parseFloat(volumeSlider.value) / 100) * 0.12;
+  synthGainNode.gain.setValueAtTime(currentVol, ctx.currentTime);
+  synthGainNode.connect(ctx.destination);
+
+  synthInterval = setInterval(() => {
+    if (!soundEnabled || isPaused) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const noteGain = ctx.createGain();
+      osc.type = 'triangle'; // Mellow warm synth
+
+      const freq = ambientScale[synthNoteIndex % ambientScale.length];
+      synthNoteIndex = (synthNoteIndex + 1 + Math.floor(Math.random() * 2)) % ambientScale.length;
+
+      osc.frequency.setValueAtTime(freq, now);
+      noteGain.gain.setValueAtTime(0.001, now);
+      noteGain.gain.linearRampToValueAtTime(0.2, now + 0.08);
+      noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+      osc.connect(noteGain);
+      noteGain.connect(synthGainNode);
+      osc.start(now);
+      osc.stop(now + 1.3);
+    } catch (e) {}
+  }, 1200);
+}
+
+function stopAmbientSynth() {
+  if (synthInterval) {
+    clearInterval(synthInterval);
+    synthInterval = null;
+  }
+}
+
+// Background Music playback management
+function playMusic() {
+  if (!soundEnabled) return;
+  ensureAudioContext();
+
+  // Try playing HTML5 Audio element first (e.g. /audio/bgm.mp3 or chosen song)
+  const playPromise = bgmAudio.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        stopAmbientSynth();
+      })
+      .catch((err) => {
+        // If file not found or unsupported, start built-in procedural ambient synth!
+        startAmbientSynth();
+      });
+  } else {
+    startAmbientSynth();
+  }
+}
+
+function pauseMusic() {
+  bgmAudio.pause();
+  stopAmbientSynth();
+}
+
+// Audio Chime on visitor arrival
 function playArrivalChime() {
   if (!soundEnabled) return;
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const ctx = ensureAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.type = 'sine';
 
-    const now = audioCtx.currentTime;
+    const now = ctx.currentTime;
     osc.frequency.setValueAtTime(587.33, now); // D5
     osc.frequency.setValueAtTime(880.0, now + 0.15); // A5
 
@@ -65,7 +188,7 @@ function playArrivalChime() {
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.65);
   } catch (err) {
@@ -73,13 +196,57 @@ function playArrivalChime() {
   }
 }
 
-// Sound toggle
+// Sound & Music Toggle
 audioToggleBtn.addEventListener('click', () => {
   soundEnabled = !soundEnabled;
-  audioToggleBtn.textContent = soundEnabled ? '🔔 Sound: On' : '🔔 Sound: Off';
-  audioToggleBtn.style.color = soundEnabled ? '#34d399' : 'white';
-  if (soundEnabled && !audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  ensureAudioContext();
+
+  if (soundEnabled) {
+    audioToggleBtn.textContent = '🔔 Music: On';
+    audioToggleBtn.style.color = '#34d399';
+    playFeedbackTone(true);
+    playMusic();
+  } else {
+    audioToggleBtn.textContent = '🔇 Music: Off';
+    audioToggleBtn.style.color = 'white';
+    playFeedbackTone(false);
+    pauseMusic();
+  }
+});
+
+// Volume Slider
+volumeSlider.addEventListener('input', (e) => {
+  const vol = parseFloat(e.target.value) / 100;
+  bgmAudio.volume = vol;
+  if (synthGainNode && audioCtx) {
+    synthGainNode.gain.setValueAtTime(vol * 0.12, audioCtx.currentTime);
+  }
+  volumeIcon.textContent = vol === 0 ? '🔇' : vol < 0.5 ? '🔉' : '🔊';
+});
+
+// Custom Song Selection
+customBgmBtn.addEventListener('click', () => {
+  bgmFileInput.click();
+});
+
+bgmFileInput.addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (file) {
+    const fileUrl = URL.createObjectURL(file);
+    bgmAudio.src = fileUrl;
+    bgmAudio.load();
+    const shortName = file.name.length > 12 ? file.name.slice(0, 10) + '...' : file.name;
+    customBgmBtn.textContent = `🎵 ${shortName}`;
+    customBgmBtn.style.color = '#34d399';
+
+    if (!soundEnabled) {
+      soundEnabled = true;
+      audioToggleBtn.textContent = '🔔 Music: On';
+      audioToggleBtn.style.color = '#34d399';
+    }
+    ensureAudioContext();
+    playFeedbackTone(true);
+    playMusic();
   }
 });
 

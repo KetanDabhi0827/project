@@ -41,7 +41,14 @@
         <span id="tvEventNameText">Live Event Slideshow</span>
       </div>
       <button id="fullscreenBtn" class="tv-fs-btn" title="Toggle Fullscreen (F11)">⛶ Fullscreen</button>
-      <button id="audioToggleBtn" class="tv-fs-btn" title="Toggle Sound Chime">🔔 Sound: Off</button>
+      <button id="audioToggleBtn" class="tv-fs-btn" title="Toggle Background Music & Arrival Sounds">🔇 Music: Off</button>
+      <div id="volumeControlGroup" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); padding: 0.25rem 0.6rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.12);">
+        <span style="font-size: 0.85rem;" id="volumeIcon">🔈</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="40" style="width: 70px; height: 4px; accent-color: var(--accent); cursor: pointer;" title="Adjust Music Volume">
+        <button id="customBgmBtn" class="tv-fs-btn" style="padding: 0.15rem 0.5rem; font-size: 0.75rem; border-color: rgba(255,255,255,0.2);" title="Select an MP3 song from your computer">🎵 Pick Song</button>
+      </div>
+      <input type="file" id="bgmFileInput" accept="audio/*" style="display: none;">
+      <audio id="bgmAudio" loop preload="auto" src="/audio/bgm.mp3"></audio>
     </div>
 
     <!-- Top Right: Up Next Queue Status -->
