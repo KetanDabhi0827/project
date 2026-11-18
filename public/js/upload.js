@@ -3,6 +3,7 @@
 let selectedFiles = [];
 let debounceTimer = null;
 let currentVisitorData = null;
+let lastGeneratedPass = null;
 
 // DOM Elements
 const uploadForm = document.getElementById('uploadForm');
@@ -270,6 +271,12 @@ uploadForm.addEventListener('submit', async (e) => {
       const passRes = await fetch(`/api/visitors/${data.visitor.id}/pass`);
       const passData = await passRes.json();
       if (passData.success && passData.pass) {
+        lastGeneratedPass = passData.pass;
+        try {
+          localStorage.setItem('savedVisitorPass', JSON.stringify(passData.pass));
+          updateAutoFillBtnState();
+        } catch (e) {}
+
         const digitalPassCard = document.getElementById('digitalPassCard');
         const passVisitorName = document.getElementById('passVisitorName');
         const passQrImg = document.getElementById('passQrImg');
@@ -383,3 +390,144 @@ reactionButtons.forEach((btn) => {
     }
   });
 });
+
+// Digital Event Pass: Copy Check-in Link & 1-Click Auto-fill
+const copyPassLinkBtn = document.getElementById('copyPassLinkBtn');
+const copyPassLinkToast = document.getElementById('copyPassLinkToast');
+const enterPassCodeBtn = document.getElementById('enterPassCodeBtn');
+
+if (copyPassLinkBtn) {
+  copyPassLinkBtn.addEventListener('click', async () => {
+    if (!lastGeneratedPass) return;
+    const url = `${window.location.origin}/?name=${encodeURIComponent(lastGeneratedPass.name)}&identifier=${encodeURIComponent(lastGeneratedPass.identifier)}&pin=${encodeURIComponent(lastGeneratedPass.pin || '')}`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const temp = document.createElement('textarea');
+        temp.value = url;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+
+      if (copyPassLinkToast) {
+        copyPassLinkToast.style.display = 'block';
+        setTimeout(() => { copyPassLinkToast.style.display = 'none'; }, 3200);
+      }
+      showToast('📋 Check-in link copied! You can bookmark or text it to yourself.');
+    } catch (e) {
+      showToast('Could not copy automatically. You can scan your QR code!', true);
+    }
+  });
+}
+
+function updateAutoFillBtnState() {
+  if (!enterPassCodeBtn) return;
+  try {
+    const raw = localStorage.getItem('savedVisitorPass');
+    if (raw) {
+      const pass = JSON.parse(raw);
+      if (pass && pass.name) {
+        const firstName = pass.name.trim().split(' ')[0];
+        enterPassCodeBtn.innerHTML = `⚡ Fill ${firstName}`;
+        enterPassCodeBtn.style.background = 'rgba(59, 130, 246, 0.2)';
+        enterPassCodeBtn.style.color = '#93c5fd';
+        enterPassCodeBtn.title = `1-Click Fill as ${pass.name}`;
+      }
+    }
+  } catch (e) {}
+}
+
+function applyPassDetails(name, identifier, pin) {
+  if (name) visitorNameInput.value = name;
+  if (identifier) visitorIdentifierInput.value = identifier;
+  if (pin) userPinInput.value = pin;
+  consentCheckbox.checked = true;
+  triggerVisitorLookup();
+}
+
+if (enterPassCodeBtn) {
+  enterPassCodeBtn.addEventListener('click', () => {
+    let savedPass = null;
+    try {
+      const raw = localStorage.getItem('savedVisitorPass');
+      if (raw) savedPass = JSON.parse(raw);
+    } catch (e) {}
+
+    if (savedPass && savedPass.name) {
+      applyPassDetails(savedPass.name, savedPass.identifier, savedPass.pin);
+      showToast(`✨ Auto-filled pass for ${savedPass.name}!`);
+      return;
+    }
+
+    const input = window.prompt('Paste your Digital Pass Check-in link or Pass Code:');
+    if (!input || !input.trim()) return;
+
+    const trimmed = input.trim();
+    // Case 1: JSON payload from QR code
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const data = JSON.parse(trimmed);
+        applyPassDetails(data.name, data.identifier, data.pin);
+        localStorage.setItem('savedVisitorPass', JSON.stringify(data));
+        updateAutoFillBtnState();
+        showToast(`✨ Auto-filled pass for ${data.name}!`);
+        return;
+      } catch (e) {}
+    }
+
+    // Case 2: URL with query parameters
+    try {
+      const url = new URL(trimmed.startsWith('http') ? trimmed : `http://localhost/${trimmed}`);
+      const name = url.searchParams.get('name');
+      const identifier = url.searchParams.get('identifier');
+      const pin = url.searchParams.get('pin');
+      if (name || identifier) {
+        applyPassDetails(name, identifier, pin);
+        localStorage.setItem('savedVisitorPass', JSON.stringify({ name, identifier, pin }));
+        updateAutoFillBtnState();
+        showToast(`✨ Auto-filled pass for ${name || 'visitor'}!`);
+        return;
+      }
+    } catch (e) {}
+
+    // Case 3: Pipe or comma-separated: Name, Identifier, PIN
+    const parts = trimmed.split(/[,|]/);
+    if (parts.length >= 2) {
+      const name = parts[0].trim();
+      const identifier = parts[1].trim();
+      const pin = parts[2] ? parts[2].trim() : '';
+      applyPassDetails(name, identifier, pin);
+      localStorage.setItem('savedVisitorPass', JSON.stringify({ name, identifier, pin }));
+      updateAutoFillBtnState();
+      showToast(`✨ Auto-filled pass for ${name}!`);
+      return;
+    }
+
+    showToast('Could not recognize pass format. Please enter details manually.', true);
+  });
+}
+
+// Auto-fill from URL parameters on page load (e.g. from bookmark or QR camera scan)
+window.addEventListener('DOMContentLoaded', () => {
+  updateAutoFillBtnState();
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+    const identifier = params.get('identifier');
+    const pin = params.get('pin');
+
+    if (name || identifier) {
+      applyPassDetails(name, identifier, pin);
+      if (name && identifier) {
+        localStorage.setItem('savedVisitorPass', JSON.stringify({ name, identifier, pin }));
+        updateAutoFillBtnState();
+      }
+      showToast(`✨ Welcome! Auto-filled pass details for ${name || 'you'}.`);
+    }
+  } catch (e) {}
+});
+

@@ -572,6 +572,81 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Confetti Animation Engine
+const confettiCanvas = document.getElementById('confettiCanvas');
+let confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+let confettiParticles = [];
+let confettiAnimId = null;
+
+function resizeConfetti() {
+  if (confettiCanvas) {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+}
+window.addEventListener('resize', resizeConfetti);
+resizeConfetti();
+
+function launchConfetti() {
+  if (!confettiCanvas || !confettiCtx) return;
+  resizeConfetti();
+
+  const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#f43f5e', '#ffd700'];
+  confettiParticles = [];
+
+  for (let i = 0; i < 90; i++) {
+    confettiParticles.push({
+      x: confettiCanvas.width * (0.2 + Math.random() * 0.6),
+      y: confettiCanvas.height * 0.9,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -(Math.random() * 14 + 10),
+      size: Math.random() * 9 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 12,
+      opacity: 1,
+      gravity: 0.38,
+      decay: 0.012 + Math.random() * 0.008,
+    });
+  }
+
+  if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+  renderConfetti();
+}
+
+function renderConfetti() {
+  if (!confettiCtx || confettiParticles.length === 0) return;
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.rotation += p.rotationSpeed;
+    p.opacity -= p.decay;
+
+    if (p.opacity <= 0 || p.y > confettiCanvas.height + 20) {
+      confettiParticles.splice(i, 1);
+      continue;
+    }
+
+    confettiCtx.save();
+    confettiCtx.translate(p.x, p.y);
+    confettiCtx.rotate((p.rotation * Math.PI) / 180);
+    confettiCtx.globalAlpha = Math.max(0, p.opacity);
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+    confettiCtx.restore();
+  }
+
+  if (confettiParticles.length > 0) {
+    confettiAnimId = requestAnimationFrame(renderConfetti);
+  } else {
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
 // Socket.IO Events
 socket.on('slideshow:slide-change', (slide) => {
   displaySlide(slide);
@@ -592,6 +667,7 @@ socket.on('slideshow:visitor-arrived', (data) => {
 
   celebrationBanner.style.display = 'block';
   playArrivalChime();
+  launchConfetti();
 
   setTimeout(() => {
     celebrationBanner.style.display = 'none';

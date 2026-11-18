@@ -144,3 +144,47 @@ This document chronicles key interactions, prompt directives, and design steerin
   2. Added context-aware personalized AI arrival greetings generator tailored to time of day and returning visit counts.
   3. Created multi-stage `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with persistent bind mounts for SQLite and uploaded media.
   4. Expanded the Jest automated test suite to 22 passing tests.
+
+---
+
+## Log Entry 11: Case 4 — AI Mistake: Smart TV Audio Autoplay Silence & Inaudible Feedback
+* **User Directive (Gujarati):**  
+  > *"song add karu hoe to back ground ma and sound na off on thi kay fer padto nathi svaj nathi avto"*  
+  > *(If I want to add background music/songs, and toggling sound ON/OFF makes no difference, no sound comes out.)*
+* **What the AI Did Wrong:**  
+  The initial audio implementation only initialized Web Audio oscillators when a `slideshow:visitor-arrived` event occurred. When a user clicked "Sound: Off / On", no sound played immediately to confirm the state change, and because modern browsers suspend un-interacted `AudioContext` instances, background audio remained muted. Additionally, no background music (BGM) player or custom music selector existed.
+* **How We Noticed:**  
+  User explicitly reported that clicking the audio toggle button produced zero audible sound and requested background song capabilities.
+* **How We Fixed It:**  
+  1. Triggered `audioCtx.resume()` immediately within the user gesture event handler.
+  2. Implemented an instant ascending synthesized chime (261Hz -> 392Hz) for audible feedback whenever the sound button is toggled.
+  3. Added an HTML5 `<audio id="bgmAudio" loop>` player with a procedural pentatonic ambient synth fallback if no external MP3 is present on disk.
+  4. Added an on-screen volume slider and a **"🎵 Pick Song"** custom audio file picker directly in the TV header.
+
+---
+
+## Log Entry 12: Case 5 — AI Mistake: TV Idle Autohide Concealed Visitor Identity
+* **User Directive (Gujarati):**  
+  > *"tv ma jiya niche name ne ae che aene hide nathi karva nu"*  
+  > *(On the TV screen, where the visitor's name is at the bottom, do NOT hide that.)*
+* **What the AI Did Wrong:**  
+  When implementing the requested auto-hide feature for controls during fullscreen and idle viewing, the CSS rule `.idle-hidden` was applied to the entire bottom overlay container (`.tv-overlay-bottom`), which caused the visitor's name, badge, and photo counter to disappear along with the navigation buttons.
+* **How We Noticed:**  
+  User clarified that while control buttons and progress bars should disappear to keep the screen uncluttered, the visitor's name and visit status are essential event information and must remain permanently on screen.
+* **How We Fixed It:**  
+  1. Decoupled the bottom overlay DOM elements.
+  2. Maintained `.tv-visitor-card` at fixed permanent visibility with high z-index and glassmorphic contrast.
+  3. Applied the `.tv-autohide` class strictly to `#tvProgressGroup` (the seconds countdown bar), `.tv-control-bar`, and top-bar control pills.
+
+---
+
+## Log Entry 13: Celebratory Canvas Confetti, 1-Click Digital Pass Auto-fill & Live Demo Guide
+* **User Directive (Gujarati):**  
+  > *"have kay better kari saki" -> "ha kari apo aa badhu and github ma pan change karta rejo"*  
+  > *(What else can we make better? -> Yes, do all of this and keep updating GitHub.)*
+* **AI Implementation:**  
+  1. **HTML5 Canvas Particle Confetti Engine:** Built a lightweight, zero-dependency confetti engine in `tv.js` that fires an explosion of multi-colored particles across the TV screen whenever a new visitor arrival banner appears.
+  2. **1-Click Digital Pass Auto-fill:** Created the `#quickCheckInBar` and `#copyPassLinkBtn` on the visitor mobile portal, allowing guests to bookmark their personal check-in URL or paste QR tokens for instant pre-filling without re-typing.
+  3. **Comprehensive Viva & Demo Guide (`DEMO_GUIDE.md`):** Authored a 2-minute live demo script with step-by-step instructions and deep technical answers to the top 10 anticipated academic/viva questions.
+  4. **Free Cloud Deployment Blueprint (`render.yaml`):** Provided automated Render.com deployment configuration for 1-click cloud hosting.
+

@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: visitor-photo-slideshow
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: EVENT_NAME
+        value: "Annual Gala & Live Showcase"
+      - key: THEME_COLOR
+        value: "blue"
+      - key: TRANSITION_EFFECT
+        value: "kenburns"
+      - key: SLIDE_DURATION
+        value: 6
+      - key: MAX_UPLOAD_SIZE_MB
+        value: 10
+      - key: MAX_PHOTOS_PER_VISITOR
+        value: 5
+      - key: ADMIN_PASSWORD
+        value: "admin123"
+    disk:
+      name: uploads-data
+      mountPath: /data
+      sizeGB: 1

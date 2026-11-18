@@ -220,6 +220,8 @@ visitor-photo-slideshow/
 - [x] **ASSUMPTIONS.md:** Detailed answers for returning visitor identity, privacy/consent, and concurrency.
 - [x] **AI_LOG.md:** Key prompt interactions and documented cases of AI mistakes with detection and fixes.
 - [x] **ARCHITECTURE.md:** Stack choices with reasons, data model, and Mermaid diagrams.
+- [x] **DEMO_GUIDE.md:** Complete 2-minute live demo script and Top 10 Viva presentation Q&A.
 - [x] **Tests:** 22 automated tests (`npm test`) and documented manual test plan with results ([TESTING.md](TESTING.md)).
+- [x] **Free Cloud Deployment:** Ready-to-go `render.yaml` for Render.com and ngrok live showcase.
 - [x] **.env.example:** Placeholder values only; no secrets committed.
 - [x] **Commit History:** Multiple regular, meaningful git commits showing project evolution.
