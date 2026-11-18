@@ -18,6 +18,7 @@ const slideTypeBadge = document.getElementById('slideTypeBadge');
 const slideCounterText = document.getElementById('slideCounterText');
 const sessionDetailsText = document.getElementById('sessionDetailsText');
 const progressBar = document.getElementById('progressBar');
+const tvProgressGroup = document.getElementById('tvProgressGroup');
 const upNextPill = document.getElementById('upNextPill');
 const upNextText = document.getElementById('upNextText');
 const celebrationBanner = document.getElementById('celebrationBanner');
@@ -495,7 +496,7 @@ function showAllUI() {
   if (tvControlBar) tvControlBar.classList.remove('autohide');
   if (overlayTopLeft) overlayTopLeft.classList.remove('autohide');
   if (overlayTopRight) overlayTopRight.classList.remove('autohide');
-  if (bottomOverlay) bottomOverlay.classList.remove('autohide');
+  if (tvProgressGroup) tvProgressGroup.classList.remove('autohide');
 }
 
 function hideAllUI() {
@@ -505,7 +506,7 @@ function hideAllUI() {
     if (tvControlBar) tvControlBar.classList.add('autohide');
     if (overlayTopLeft) overlayTopLeft.classList.add('autohide');
     if (overlayTopRight) overlayTopRight.classList.add('autohide');
-    if (bottomOverlay) bottomOverlay.classList.add('autohide');
+    if (tvProgressGroup) tvProgressGroup.classList.add('autohide');
     document.body.classList.add('tv-idle-hidden');
   }
 }

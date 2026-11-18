@@ -560,12 +560,27 @@ body.theme-amber {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+}
+
+/* Visitor card at bottom ALWAYS stays visible */
+.tv-visitor-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
+}
+
+/* Slide Duration Progress Bar (Seconds bar) autohides smoothly */
+.tv-progress-group {
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.tv-overlay-bottom.autohide {
+.tv-progress-group.autohide {
   opacity: 0;
-  transform: translateY(25px);
+  transform: translateY(20px);
   pointer-events: none;
 }
 
