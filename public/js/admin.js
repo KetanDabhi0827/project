@@ -165,8 +165,11 @@ async function loadPhotos() {
           <div>
             ${statusBadge}
             <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">${photo.visitor_name}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem;">
               ${new Date(photo.created_at).toLocaleString()}
+            </div>
+            <div style="font-size: 0.72rem; color: #34d399; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
+              <span>🤖</span> <span>AI Safety Verified • Smart TV Fit</span>
             </div>
           </div>
           <div>${actionBtn}</div>

@@ -370,7 +370,9 @@ socket.on('slideshow:visitor-arrived', (data) => {
     ? `Welcome Back, ${data.visitorName}! ⭐`
     : `Welcome, ${data.visitorName}! 📸`;
 
-  if (data.isReturning && data.pastPhotoCount > 0) {
+  if (data.welcomeGreeting) {
+    celebrationSubtitle.textContent = data.welcomeGreeting;
+  } else if (data.isReturning && data.pastPhotoCount > 0) {
     celebrationSubtitle.textContent = `Playing ${data.pastPhotoCount} past photo(s) + ${data.newPhotoCount} new photo(s)`;
   } else {
     celebrationSubtitle.textContent = `Playing ${data.newPhotoCount} new photo(s)`;
@@ -381,7 +383,7 @@ socket.on('slideshow:visitor-arrived', (data) => {
 
   setTimeout(() => {
     celebrationBanner.style.display = 'none';
-  }, 2800);
+  }, 3500);
 });
 
 socket.on('slideshow:queue-update', (summary) => {

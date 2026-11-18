@@ -54,7 +54,7 @@ class QueueService extends EventEmitter {
   /**
    * Enqueues an upload batch for slideshow playback.
    */
-  enqueueBatch({ visitor, pastPhotos = [], newPhotos = [], batchId }) {
+  enqueueBatch({ visitor, pastPhotos = [], newPhotos = [], batchId, welcomeGreeting }) {
     // Fair-share limitation: cap past photos to prevent monopolization when multiple visitors upload
     const maxPast = 5;
     const selectedPast = pastPhotos.slice(-maxPast);
@@ -87,6 +87,7 @@ class QueueService extends EventEmitter {
       batchId: batchId || uuidv4(),
       visitorId: visitor.id,
       visitorName: visitor.name,
+      welcomeGreeting: welcomeGreeting || null,
       isReturning: Boolean(visitor.isReturning || (visitor.visitCount && visitor.visitCount > 1)),
       visitCount: visitor.visitCount || 1,
       totalPastPhotos: pastPhotos.length,
@@ -127,6 +128,7 @@ class QueueService extends EventEmitter {
     this.emit('visitor-arrived', {
       batchId: batch.batchId,
       visitorName: batch.visitorName,
+      welcomeGreeting: batch.welcomeGreeting,
       isReturning: batch.isReturning,
       visitCount: batch.visitCount,
       newPhotoCount: batch.newPhotoCount,
@@ -140,7 +142,7 @@ class QueueService extends EventEmitter {
   playCurrentBatchSlide() {
     if (!this.currentBatch) return;
 
-    const { slides, currentSlideIndex, visitorName, isReturning, visitCount } = this.currentBatch;
+    const { slides, currentSlideIndex, visitorName, isReturning, visitCount, welcomeGreeting } = this.currentBatch;
     const slide = slides[currentSlideIndex];
 
     this.currentSlide = {
@@ -148,6 +150,7 @@ class QueueService extends EventEmitter {
       slideNumber: currentSlideIndex + 1,
       totalSlides: slides.length,
       visitorName,
+      welcomeGreeting,
       isReturning,
       visitCount,
       duration: this.slideDurationSeconds,
