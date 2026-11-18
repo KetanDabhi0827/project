@@ -30,6 +30,8 @@ const volumeSlider = document.getElementById('volumeSlider');
 const customBgmBtn = document.getElementById('customBgmBtn');
 const bgmFileInput = document.getElementById('bgmFileInput');
 const volumeIcon = document.getElementById('volumeIcon');
+const overlayTopLeft = document.querySelector('.tv-overlay-top-left');
+const overlayTopRight = document.querySelector('.tv-overlay-top-right');
 
 // Interactive Control Bar
 const tvControlBar = document.getElementById('tvControlBar');
@@ -476,17 +478,59 @@ tvRefreshBtn.addEventListener('click', () => {
   socket.emit('slideshow:request-state');
 });
 
-// Auto-hide Control Bar on idle
+// Auto-hide All Overlays (Top bar, Music, Volume, Control Bar, Bottom Progress Bar) on idle
+let isHoveringInteractiveUI = false;
+
+if (tvControlBar) {
+  tvControlBar.addEventListener('mouseenter', () => { isHoveringInteractiveUI = true; });
+  tvControlBar.addEventListener('mouseleave', () => { isHoveringInteractiveUI = false; resetControlBarTimer(); });
+}
+if (overlayTopLeft) {
+  overlayTopLeft.addEventListener('mouseenter', () => { isHoveringInteractiveUI = true; });
+  overlayTopLeft.addEventListener('mouseleave', () => { isHoveringInteractiveUI = false; resetControlBarTimer(); });
+}
+
+function showAllUI() {
+  document.body.classList.remove('tv-idle-hidden');
+  if (tvControlBar) tvControlBar.classList.remove('autohide');
+  if (overlayTopLeft) overlayTopLeft.classList.remove('autohide');
+  if (overlayTopRight) overlayTopRight.classList.remove('autohide');
+  if (bottomOverlay) bottomOverlay.classList.remove('autohide');
+}
+
+function hideAllUI() {
+  if (isHoveringInteractiveUI) return;
+  // If not currently in standby card
+  if (currentSlide && !currentSlide.isStandby) {
+    if (tvControlBar) tvControlBar.classList.add('autohide');
+    if (overlayTopLeft) overlayTopLeft.classList.add('autohide');
+    if (overlayTopRight) overlayTopRight.classList.add('autohide');
+    if (bottomOverlay) bottomOverlay.classList.add('autohide');
+    document.body.classList.add('tv-idle-hidden');
+  }
+}
+
 function resetControlBarTimer() {
-  tvControlBar.classList.remove('autohide');
+  showAllUI();
   clearTimeout(controlBarTimeout);
   controlBarTimeout = setTimeout(() => {
-    tvControlBar.classList.add('autohide');
+    hideAllUI();
   }, 3500);
 }
 
 document.addEventListener('mousemove', resetControlBarTimer);
+document.addEventListener('mousedown', resetControlBarTimer);
 document.addEventListener('click', resetControlBarTimer);
+document.addEventListener('touchstart', resetControlBarTimer);
+document.addEventListener('touchmove', resetControlBarTimer);
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) {
+    fullscreenBtn.textContent = '✕ Exit Fullscreen';
+  } else {
+    fullscreenBtn.textContent = '⛶ Fullscreen';
+  }
+  resetControlBarTimer();
+});
 resetControlBarTimer();
 
 // Keyboard & TV Remote Shortcuts

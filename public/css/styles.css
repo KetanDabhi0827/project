@@ -481,6 +481,13 @@ body.theme-amber {
   display: flex;
   align-items: center;
   gap: 1rem;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.tv-overlay-top-left.autohide {
+  opacity: 0;
+  transform: translateY(-25px);
+  pointer-events: none;
 }
 
 .tv-live-pill {
@@ -521,6 +528,13 @@ body.theme-amber {
   display: flex;
   align-items: center;
   gap: 1rem;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.tv-overlay-top-right.autohide {
+  opacity: 0;
+  transform: translateY(-25px);
+  pointer-events: none;
 }
 
 .tv-up-next-pill {
@@ -546,6 +560,18 @@ body.theme-amber {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.tv-overlay-bottom.autohide {
+  opacity: 0;
+  transform: translateY(25px);
+  pointer-events: none;
+}
+
+body.tv-idle-hidden,
+body.tv-idle-hidden * {
+  cursor: none !important;
 }
 
 .tv-visitor-card {
