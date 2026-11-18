@@ -485,3 +485,39 @@ socket.on('slideshow:reaction', (data) => {
     triggerFloatingEmoji(data.emoji, data.xPos);
   }
 });
+
+// Dynamic Branding & Customization Engine
+const tvEventNameText = document.getElementById('tvEventNameText');
+
+function applyBrandingSettings(settings) {
+  if (!settings) return;
+  if (settings.eventName && tvEventNameText) {
+    tvEventNameText.textContent = settings.eventName;
+  }
+  if (settings.themeColor) {
+    document.body.classList.remove('theme-blue', 'theme-purple', 'theme-emerald', 'theme-rose', 'theme-amber');
+    document.body.classList.add(`theme-${settings.themeColor}`);
+  }
+  if (settings.transitionEffect) {
+    document.body.classList.remove('transition-kenburns', 'transition-3d-flip', 'transition-zoom', 'transition-smooth-fade');
+    document.body.classList.add(`transition-${settings.transitionEffect}`);
+  }
+}
+
+async function loadInitialSettings() {
+  try {
+    const res = await fetch('/api/slideshow/settings');
+    const data = await res.json();
+    if (data.success && data.settings) {
+      applyBrandingSettings(data.settings);
+    }
+  } catch (err) {
+    console.warn('Could not load settings:', err);
+  }
+}
+
+loadInitialSettings();
+
+socket.on('slideshow:branding-update', (branding) => {
+  applyBrandingSettings(branding);
+});

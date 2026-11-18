@@ -129,6 +129,55 @@ router.post('/clear-queue', (req, res) => {
 });
 
 /**
+ * POST /api/admin/settings
+ * Updates event branding, colors, transitions, and reactions toggle
+ */
+router.post('/settings', async (req, res, next) => {
+  try {
+    const { eventName, eventTagline, themeColor, transitionEffect, allowGuestReactions, slideDuration } = req.body;
+    const { runAsync } = require('../db/database');
+    const db = getDatabase();
+
+    if (eventName !== undefined) {
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('event_name', ?)`, [eventName.trim()]);
+    }
+    if (eventTagline !== undefined) {
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('event_tagline', ?)`, [eventTagline.trim()]);
+    }
+    if (themeColor !== undefined) {
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('theme_color', ?)`, [themeColor.trim()]);
+    }
+    if (transitionEffect !== undefined) {
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('transition_effect', ?)`, [transitionEffect.trim()]);
+    }
+    if (allowGuestReactions !== undefined) {
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('allow_guest_reactions', ?)`, [allowGuestReactions.toString()]);
+    }
+    if (slideDuration !== undefined) {
+      queueService.setSlideDuration(slideDuration);
+      await runAsync(db, `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('slide_duration', ?)`, [slideDuration.toString()]);
+    }
+
+    const socketService = require('../services/socketService');
+    const io = socketService.getIO();
+    if (io) {
+      io.emit('slideshow:branding-update', {
+        eventName,
+        eventTagline,
+        themeColor,
+        transitionEffect,
+        allowGuestReactions,
+        slideDuration,
+      });
+    }
+
+    res.json({ success: true, message: 'Event branding and settings updated successfully.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/admin/audit-logs
  */
 router.get('/audit-logs', async (req, res, next) => {

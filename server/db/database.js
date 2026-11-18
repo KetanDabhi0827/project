@@ -110,15 +110,28 @@ function initSchema(db = getDatabase()) {
       `, (err) => {
         if (err) return reject(err);
 
-        // Seed default slide duration if not present
-        db.run(
-          `INSERT OR IGNORE INTO slideshow_settings (key, value) VALUES ('slide_duration', ?)`,
-          [config.slideDurationSeconds.toString()],
-          (seedErr) => {
-            if (seedErr) return reject(seedErr);
-            resolve(db);
-          }
-        );
+        // Seed default settings if not present
+        const defaultSettings = [
+          ['slide_duration', config.slideDurationSeconds.toString()],
+          ['event_name', 'Live Event Slideshow'],
+          ['event_tagline', 'Share your moments on the big screen'],
+          ['theme_color', 'blue'],
+          ['transition_effect', 'kenburns'],
+          ['allow_guest_reactions', 'true'],
+        ];
+
+        let pending = defaultSettings.length;
+        defaultSettings.forEach(([k, v]) => {
+          db.run(
+            `INSERT OR IGNORE INTO slideshow_settings (key, value) VALUES (?, ?)`,
+            [k, v],
+            (seedErr) => {
+              if (seedErr) return reject(seedErr);
+              pending--;
+              if (pending === 0) resolve(db);
+            }
+          );
+        });
       });
     });
   });

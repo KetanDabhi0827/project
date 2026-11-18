@@ -339,6 +339,65 @@ input:focus, select:focus {
   }
 }
 
+/* Dynamic Transition Effect Modifiers */
+.transition-kenburns .tv-slide-image.active {
+  animation: kenburns 12s ease-out alternate infinite;
+}
+
+.transition-3d-flip .tv-slide-wrapper {
+  perspective: 1200px;
+}
+.transition-3d-flip .tv-slide-image {
+  transform: rotateY(70deg) scale(0.9);
+  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.85s ease-in-out;
+}
+.transition-3d-flip .tv-slide-image.active {
+  transform: rotateY(0deg) scale(1);
+  animation: none;
+}
+
+.transition-zoom .tv-slide-image {
+  transform: scale(1.2);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease-in-out;
+}
+.transition-zoom .tv-slide-image.active {
+  transform: scale(1);
+  animation: none;
+}
+
+.transition-smooth-fade .tv-slide-image {
+  transform: scale(1);
+  transition: opacity 1.2s ease-in-out;
+}
+.transition-smooth-fade .tv-slide-image.active {
+  animation: none;
+}
+
+/* Dynamic Color Themes */
+body.theme-purple {
+  --accent: #a855f7;
+  --accent-hover: #9333ea;
+  --accent-glow: rgba(168, 85, 247, 0.4);
+}
+
+body.theme-emerald {
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.4);
+}
+
+body.theme-rose {
+  --accent: #f43f5e;
+  --accent-hover: #e11d48;
+  --accent-glow: rgba(244, 63, 94, 0.4);
+}
+
+body.theme-amber {
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-glow: rgba(245, 158, 11, 0.4);
+}
+
 /* Floating Interactive Control Bar for Smart TV */
 .tv-control-bar {
   position: absolute;

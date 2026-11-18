@@ -156,6 +156,49 @@
             </div>
           </div>
         </div>
+      <!-- Event Branding & Customization Settings -->
+      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">🎨 Event Branding & Visual Theme</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
+          Customize the event title, theme colors, and transition animations displayed across all screens in real time.
+        </p>
+
+        <form id="brandingForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="brandEventName">Event Name</label>
+            <input type="text" id="brandEventName" placeholder="e.g. Annual Tech Summit 2026">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="brandEventTagline">Tagline / Subtitle</label>
+            <input type="text" id="brandEventTagline" placeholder="e.g. Welcome Guests & Innovators">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="brandThemeColor">Theme Color Accent</label>
+            <select id="brandThemeColor">
+              <option value="blue">Ocean Blue (Default)</option>
+              <option value="purple">Royal Purple</option>
+              <option value="emerald">Emerald Glow</option>
+              <option value="rose">Rose Gold</option>
+              <option value="amber">Sunset Amber</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="brandTransition">Transition Animation</label>
+            <select id="brandTransition">
+              <option value="kenburns">Ken Burns Pan & Zoom</option>
+              <option value="3d-flip">3D Card Flip</option>
+              <option value="zoom">Quick Dynamic Zoom</option>
+              <option value="smooth-fade">Smooth Crossfade</option>
+            </select>
+          </div>
+
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button type="submit" id="saveBrandingBtn" class="btn btn-primary btn-sm">💾 Save & Apply Branding</button>
+          </div>
+        </form>
       </div>
 
       <!-- Photos Moderation Grid -->

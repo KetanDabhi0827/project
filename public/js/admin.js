@@ -67,9 +67,68 @@ authBtn.addEventListener('click', async () => {
 
 // Load all admin data
 async function loadAllAdminData() {
+  loadBrandingSettings();
   loadPhotos();
   loadVisitors();
   loadAuditLogs();
+}
+
+// 0. Branding & Settings
+const brandingForm = document.getElementById('brandingForm');
+const brandEventName = document.getElementById('brandEventName');
+const brandEventTagline = document.getElementById('brandEventTagline');
+const brandThemeColor = document.getElementById('brandThemeColor');
+const brandTransition = document.getElementById('brandTransition');
+const saveBrandingBtn = document.getElementById('saveBrandingBtn');
+
+async function loadBrandingSettings() {
+  try {
+    const res = await fetch('/api/slideshow/settings');
+    const data = await res.json();
+    if (data.success && data.settings) {
+      if (brandEventName) brandEventName.value = data.settings.eventName || '';
+      if (brandEventTagline) brandEventTagline.value = data.settings.eventTagline || '';
+      if (brandThemeColor) brandThemeColor.value = data.settings.themeColor || 'blue';
+      if (brandTransition) brandTransition.value = data.settings.transitionEffect || 'kenburns';
+    }
+  } catch (err) {
+    console.warn('Could not load branding settings:', err);
+  }
+}
+
+if (brandingForm) {
+  brandingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveBrandingBtn.disabled = true;
+    saveBrandingBtn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+        },
+        body: JSON.stringify({
+          eventName: brandEventName.value,
+          eventTagline: brandEventTagline.value,
+          themeColor: brandThemeColor.value,
+          transitionEffect: brandTransition.value,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ Event branding and themes updated live across all screens!');
+      } else {
+        alert(data.error || 'Failed to update branding.');
+      }
+    } catch (err) {
+      alert('Error updating branding: ' + err.message);
+    } finally {
+      saveBrandingBtn.disabled = false;
+      saveBrandingBtn.textContent = '💾 Save & Apply Branding';
+    }
+  });
 }
 
 // 1. Photos

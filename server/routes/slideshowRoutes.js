@@ -30,6 +30,36 @@ router.get('/state', (req, res) => {
 });
 
 /**
+ * GET /api/slideshow/settings
+ * Returns dynamic event branding and playback settings
+ */
+router.get('/settings', async (req, res, next) => {
+  try {
+    const { getDatabase, allAsync } = require('../db/database');
+    const db = getDatabase();
+    const rows = await allAsync(db, `SELECT key, value FROM slideshow_settings`);
+    const settings = {};
+    rows.forEach((r) => {
+      settings[r.key] = r.value;
+    });
+
+    res.json({
+      success: true,
+      settings: {
+        eventName: settings.event_name || 'Live Event Slideshow',
+        eventTagline: settings.event_tagline || 'Share your moments on the big screen',
+        themeColor: settings.theme_color || 'blue',
+        transitionEffect: settings.transition_effect || 'kenburns',
+        allowGuestReactions: settings.allow_guest_reactions !== 'false',
+        slideDuration: parseInt(settings.slide_duration || '6', 10),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/slideshow/qr
  * Generates a QR code for smart TVs linking directly to the visitor upload URL.
  */
