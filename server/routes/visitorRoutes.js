@@ -47,4 +47,53 @@ router.post('/withdraw-consent', async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/visitors/:id/pass
+ * Generates a digital event pass card with QR code for quick returning check-ins
+ */
+router.get('/:id/pass', async (req, res, next) => {
+  try {
+    const QRCode = require('qrcode');
+    const { getDatabase, getAsync } = require('../db/database');
+    const db = getDatabase();
+    const visitor = await getAsync(
+      db,
+      `SELECT id, name, identifier, pin, visit_count, first_visited_at FROM visitors WHERE id = ?`,
+      [req.params.id]
+    );
+
+    if (!visitor) {
+      return res.status(404).json({ success: false, error: 'Visitor not found.' });
+    }
+
+    const checkInData = JSON.stringify({
+      vId: visitor.id,
+      name: visitor.name,
+      identifier: visitor.identifier,
+      pin: visitor.pin,
+    });
+
+    const qrDataUrl = await QRCode.toDataURL(checkInData, {
+      width: 220,
+      margin: 2,
+      color: { dark: '#0f172a', light: '#ffffff' },
+    });
+
+    res.json({
+      success: true,
+      pass: {
+        id: visitor.id,
+        name: visitor.name,
+        identifier: visitor.identifier,
+        pin: visitor.pin,
+        visitCount: visitor.visit_count,
+        memberSince: visitor.first_visited_at,
+        qrDataUrl,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

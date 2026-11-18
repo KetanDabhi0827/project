@@ -78,6 +78,11 @@ class PhotoService {
       isPast: true,
       visitBatchId: row.visit_batch_id,
       createdAt: row.created_at,
+      formattedDate: new Date(row.created_at).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
     }));
   }
 

@@ -253,6 +253,24 @@ uploadForm.addEventListener('submit', async (e) => {
     successMessage.textContent = data.message;
     displayPin.textContent = data.visitor.pin;
 
+    // Load and render Digital Event Pass
+    try {
+      const passRes = await fetch(`/api/visitors/${data.visitor.id}/pass`);
+      const passData = await passRes.json();
+      if (passData.success && passData.pass) {
+        const digitalPassCard = document.getElementById('digitalPassCard');
+        const passVisitorName = document.getElementById('passVisitorName');
+        const passQrImg = document.getElementById('passQrImg');
+        if (digitalPassCard && passQrImg) {
+          passVisitorName.textContent = passData.pass.name + (passData.pass.visitCount > 1 ? ` (Visit #${passData.pass.visitCount})` : '');
+          passQrImg.src = passData.pass.qrDataUrl;
+          digitalPassCard.style.display = 'block';
+        }
+      }
+    } catch (passErr) {
+      console.warn('Digital pass error:', passErr);
+    }
+
     showToast('Photos uploaded successfully! Playing on the smart TV.');
   } catch (err) {
     showToast(err.message, true);

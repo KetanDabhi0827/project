@@ -203,13 +203,13 @@ function displaySlide(slide) {
     slideTypeBadge.style.background = 'rgba(245, 158, 11, 0.25)';
     slideTypeBadge.style.color = '#fde68a';
     slideCounterText.textContent = `Photo ${slide.slideNumber} of ${slide.totalSlides}`;
-    sessionDetailsText.textContent = 'From a previous visit';
+    sessionDetailsText.textContent = slide.dateLabel || 'From a previous visit';
   } else {
     slideTypeBadge.textContent = '✨ New Photo';
     slideTypeBadge.style.background = 'rgba(16, 185, 129, 0.25)';
     slideTypeBadge.style.color = '#a7f3d0';
     slideCounterText.textContent = `Photo ${slide.slideNumber} of ${slide.totalSlides}`;
-    sessionDetailsText.textContent = 'Uploaded today';
+    sessionDetailsText.textContent = slide.dateLabel || 'Uploaded today';
   }
 
   // Start visual timer bar

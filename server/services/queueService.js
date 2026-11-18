@@ -68,6 +68,7 @@ class QueueService extends EventEmitter {
         visitorName: visitor.name,
         originalName: p.originalName,
         slideType: 'past_photo',
+        dateLabel: p.formattedDate ? `Memory from ${p.formattedDate}` : 'Past Visit Memory',
       })),
       ...newPhotos.map((p, idx) => ({
         id: p.id,
@@ -77,6 +78,7 @@ class QueueService extends EventEmitter {
         visitorName: visitor.name,
         originalName: p.originalName,
         slideType: 'new_photo',
+        dateLabel: 'Uploaded Today',
       })),
     ];
 
