@@ -6,6 +6,8 @@ node_modules/
 *.db-shm
 public/uploads/*
 !public/uploads/.gitkeep
+public/audio/*
+!public/audio/.gitkeep
 coverage/
 .DS_Store
 *.log
