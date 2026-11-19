@@ -45,11 +45,14 @@
    - **Automated Retention Worker:** Ephemeral event photos automatically expire and are purged from disk after 24 hours (`RETENTION_HOURS=24`).
    - **Privacy Audit Trail:** Every consent grant, revocation, and moderation action is logged with a salted SHA-256 IP hash for compliance.
 
-7. **⚙️ Admin & Moderation Console (`/admin.html`):**
-   - Live slideshow controls: Skip current slide, Pause/Resume, Clear Queue.
-   - Dynamic slide display duration slider (2s – 30s) broadcast live to all connected screens.
-   - Instant photo moderation grid: Flag and hide any inappropriate image in $< 200\text{ms}$.
-   - Complete directory of registered visitors, visit frequencies, and consent audit logs.
+7. **⚙️ Admin & Event Command Center (`/admin.html`):**
+   - **Executive KPI Dashboard:** Real-time counts of Total Photos, Active on Screen, Unique Visitors, Returning Guests, and Queue Depth.
+   - **Live TV Screen Monitor:** Shows an actual live preview thumbnail and visitor details of the slide playing on smart TVs.
+   - **Smart TV Announcement Broadcaster:** Push live banner alerts, food calls, or VIP announcements with audio chimes to all screens.
+   - **Moderator Cheer Blaster:** Send instant floating reactions (`❤️`, `🔥`, `🎉`, `👏`, `⭐`) to the big screen.
+   - **Photo Moderation Suite:** Search photos by visitor name, filter by Active/Hidden, zoom in full modal, and Hide or Restore photos.
+   - **Visitor Directory & CSV Export:** Searchable visitor directory with 1-click CSV spreadsheet download.
+   - **Live Slideshow Controls:** Remote Pause/Resume, Next/Previous, Clear Queue, and slide duration slider (2s – 30s).
 
 8. **🐳 Production Docker Containerization:**
    - Ready for one-command cloud deployment via `Dockerfile` and `docker-compose.yml`.

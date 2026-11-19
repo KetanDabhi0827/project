@@ -811,3 +811,27 @@ loadInitialSettings();
 socket.on('slideshow:branding-update', (branding) => {
   applyBrandingSettings(branding);
 });
+
+// Live Announcement Broadcast from Admin Console
+let announcementTimer = null;
+socket.on('slideshow:announcement', (data) => {
+  if (!data || !data.message) return;
+  const banner = document.getElementById('announcementBanner');
+  const title = document.getElementById('announcementTitle');
+  const text = document.getElementById('announcementText');
+  const icon = document.getElementById('announcementIcon');
+
+  if (banner && text) {
+    if (title) title.textContent = data.title || '📢 Live Announcement';
+    text.textContent = data.message;
+    if (icon && data.icon) icon.textContent = data.icon;
+
+    banner.style.display = 'block';
+    playArrivalChime();
+
+    if (announcementTimer) clearTimeout(announcementTimer);
+    announcementTimer = setTimeout(() => {
+      banner.style.display = 'none';
+    }, (data.duration || 8) * 1000);
+  }
+});

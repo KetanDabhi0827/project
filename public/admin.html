@@ -3,38 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin & Moderation Console | Slideshow Hub</title>
+  <title>Admin & Event Command Center | Smart TV Slideshow</title>
   <link rel="stylesheet" href="/css/styles.css">
   <style>
     .admin-container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
+      max-width: 1240px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.25rem;
     }
+
+    /* Top KPI Stat Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi-card {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(96, 165, 250, 0.4);
+    }
+    .kpi-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+    }
+
+    /* Grid 2 Column Layout */
     .grid-2 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
     }
-    @media (max-width: 850px) {
+    @media (max-width: 960px) {
       .grid-2 { grid-template-columns: 1fr; }
     }
+
     .panel-card {
       padding: 1.5rem;
+      border-radius: var(--radius-md);
     }
+
+    /* Live Preview Screen */
+    .live-monitor-box {
+      display: flex;
+      gap: 1.25rem;
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    @media (max-width: 600px) {
+      .live-monitor-box { flex-direction: column; align-items: flex-start; }
+    }
+    .live-preview-img-wrapper {
+      width: 160px;
+      height: 100px;
+      background: #020617;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .live-preview-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .live-dot-pulse {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 2px 6px;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+    .live-dot-pulse span {
+      width: 6px;
+      height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 1.8s infinite;
+    }
+
+    /* Controls Row */
     .controls-row {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
       align-items: center;
       margin-top: 1rem;
     }
+
+    /* Photo Moderation Grid */
     .photo-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 1.25rem;
-      margin-top: 1rem;
+      margin-top: 1.25rem;
     }
     .photo-card {
       background: rgba(15, 23, 42, 0.7);
@@ -43,14 +151,20 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .photo-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(96, 165, 250, 0.4);
     }
     .photo-card img {
       width: 100%;
-      height: 160px;
+      height: 155px;
       object-fit: cover;
+      cursor: zoom-in;
     }
     .photo-meta {
-      padding: 0.75rem;
+      padding: 0.85rem;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -58,19 +172,55 @@
     }
     .badge-status {
       display: inline-block;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
     }
-    .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .badge-hidden { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-hidden { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+
+    /* Filter & Search Bar */
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .filter-chips {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .filter-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-secondary);
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .filter-chip.active, .filter-chip:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* Tables */
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     th, td {
       padding: 0.75rem 1rem;
@@ -78,12 +228,75 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     th {
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.7);
       color: var(--text-secondary);
-      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.6px;
     }
     tr:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-content {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      max-width: 650px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .modal-body img {
+      max-width: 100%;
+      max-height: 55vh;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    /* Toast */
+    .admin-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.85rem 1.25rem;
+      color: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1100;
+      display: none;
+      font-size: 0.9rem;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
 </head>
@@ -91,79 +304,204 @@
   <!-- Header -->
   <header class="app-header">
     <a href="/admin.html" class="brand">
-      ⚙️ <span>Slideshow Moderator</span>
-      <span class="badge">Admin</span>
+      ⚙️ <span>Event Command Center</span>
+      <span class="badge">Moderator</span>
     </a>
-    <nav class="nav-links">
-      <a href="/" class="nav-link">📸 Visitor Upload</a>
-      <a href="/tv.html" class="nav-link" target="_blank">📺 Open Smart TV</a>
-    </nav>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span id="socketStatusDot" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: #34d399; font-weight: 600; background: rgba(52, 211, 153, 0.1); padding: 0.2rem 0.6rem; border-radius: 9999px;">
+        <span style="width: 7px; height: 7px; background: #34d399; border-radius: 50%;"></span> Relay Connected
+      </span>
+      <nav class="nav-links">
+        <a href="/" class="nav-link" target="_blank">📸 Visitor Upload</a>
+        <a href="/tv.html" class="nav-link" target="_blank" style="color: #60a5fa; font-weight: 700;">📺 Smart TV Screen</a>
+      </nav>
+    </div>
   </header>
 
   <main class="admin-container">
     <!-- Auth Barrier (Prompts if key not saved) -->
-    <div id="authPanel" class="glass-panel panel-card" style="max-width: 450px; margin: 3rem auto; text-align: center;">
-      <h2 style="margin-bottom: 0.5rem;">Admin Access</h2>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Enter the administrator key defined in <code>.env</code> (Default: <code>admin123</code>).
+    <div id="authPanel" class="glass-panel panel-card" style="max-width: 440px; margin: 4rem auto; text-align: center;">
+      <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">🔐</div>
+      <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 800;">Admin Authentication</h2>
+      <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem;">
+        Enter your Admin Key to manage live broadcasts, moderation, and event branding.
       </p>
       <div class="form-group">
-        <input type="password" id="adminKeyInput" placeholder="Admin API Key" value="admin123">
+        <input type="password" id="adminKeyInput" placeholder="Admin API Key" value="admin123" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
       </div>
-      <button id="authBtn" class="btn btn-primary" style="width: 100%;">Unlock Admin Dashboard</button>
+      <button id="authBtn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Unlock Command Center</button>
+      <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-muted);">
+        Default local key: <code>admin123</code> (configured in <code>.env</code>)
+      </div>
     </div>
 
     <!-- Main Dashboard Section -->
     <div id="dashboardSection" style="display: none;">
-      <!-- Grid Row 1: Live Controls & Preview -->
-      <div class="grid-2">
-        <!-- Live Playback Controls -->
-        <div class="glass-panel panel-card">
-          <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Live Slideshow Controls</h2>
-          <p style="color: var(--text-secondary); font-size: 0.85rem;">Manage currently playing slides and pending visitor queue.</p>
 
+      <!-- Top KPI Stats Row -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">📸 Total Photos</div>
+          <div class="kpi-value" id="kpiTotalPhotos">0</div>
+          <div class="kpi-sub"><span id="kpiActivePhotos" style="color: #34d399; font-weight: 700;">0</span> active on TV</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">👥 Unique Visitors</div>
+          <div class="kpi-value" id="kpiTotalVisitors">0</div>
+          <div class="kpi-sub"><span id="kpiReturningVisitors" style="color: #60a5fa; font-weight: 700;">0</span> returning guests</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">⏳ Waiting Queue</div>
+          <div class="kpi-value" id="kpiQueueCount">0</div>
+          <div class="kpi-sub">batches queued for broadcast</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">⏱️ Slide Speed</div>
+          <div class="kpi-value" id="kpiSlideDuration">6s</div>
+          <div class="kpi-sub">playback interval per photo</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-title">🎨 Active Theme</div>
+          <div class="kpi-value" id="kpiThemeName" style="font-size: 1.4rem; text-transform: capitalize; margin-top: 0.35rem;">Ocean Blue</div>
+          <div class="kpi-sub" id="kpiTransitionName">Ken Burns</div>
+        </div>
+      </div>
+
+      <!-- Row 1: Live Monitor & Playback Deck -->
+      <div class="grid-2">
+        <!-- Live Playback Controls & Status -->
+        <div class="glass-panel panel-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2 style="font-size: 1.25rem; font-weight: 700;">📺 Live Screen Monitor</h2>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Real-time feed of what is currently playing on Smart TV displays.</p>
+            </div>
+            <button id="refreshStatsBtn" class="btn btn-secondary btn-sm" title="Refresh metrics">🔄 Sync</button>
+          </div>
+
+          <!-- Live Visual Monitor Box -->
+          <div class="live-monitor-box">
+            <div class="live-preview-img-wrapper">
+              <div class="live-dot-pulse"><span></span> LIVE</div>
+              <img id="liveSlideThumb" src="/images/standby-preview.svg" alt="Live screen slide" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'100\' fill=\'%231e293b\'><rect width=\'100%25\' height=\'100%25\'/><text x=\'50%25\' y=\'55%25\' fill=\'%2364748b\' text-anchor=\'middle\' font-size=\'12\'>Waiting for uploads</text></svg>'">
+            </div>
+            <div style="flex: 1;">
+              <div id="liveSlideVisitor" style="font-size: 1.25rem; font-weight: 800; color: #60a5fa;">Standby Screen</div>
+              <div id="liveSlideMeta" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">Showing QR code standby reel</div>
+              <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span id="liveStatusBadge" class="badge-status badge-active">Live Broadcasting</span>
+                <span id="liveSpeedBadge" style="font-size: 0.72rem; color: var(--text-muted);">⏱️ 6s per slide</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playback Controls Buttons -->
           <div class="controls-row">
             <button id="prevBtn" class="btn btn-secondary btn-sm">⏮️ Previous</button>
-            <button id="skipBtn" class="btn btn-secondary btn-sm">⏭️ Next</button>
             <button id="pauseToggleBtn" class="btn btn-secondary btn-sm">⏸️ Pause</button>
-            <button id="clearQueueBtn" class="btn btn-danger btn-sm">🗑️ Clear Pending Queue</button>
+            <button id="skipBtn" class="btn btn-secondary btn-sm">⏭️ Next</button>
+            <button id="clearQueueBtn" class="btn btn-danger btn-sm">🗑️ Clear Queue</button>
           </div>
 
-          <div style="margin-top: 1.5rem;">
-            <label for="durationSlider">Slide Display Duration: <strong id="durationDisplay">6s</strong></label>
+          <!-- Duration Slider -->
+          <div style="margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label for="durationSlider" style="font-size: 0.85rem; font-weight: 600; margin: 0;">Slide Display Duration:</label>
+              <strong id="durationDisplay" style="color: #60a5fa; font-size: 0.95rem;">6s</strong>
+            </div>
             <input type="range" id="durationSlider" min="2" max="30" value="6" style="width: 100%; accent-color: var(--accent);">
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
-              <span>Fast (2s)</span>
-              <span>Default (6s)</span>
-              <span>Long (30s)</span>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span>⚡ Fast (2s)</span>
+              <span>Standard (6s)</span>
+              <span>Cinematic (30s)</span>
+            </div>
+          </div>
+
+          <!-- Admin Emoji Cheering Bar -->
+          <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">
+              ✨ Moderator Cheer: Send floating reactions to the TV screen:
+            </label>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary btn-sm admin-react-btn" data-emoji="❤️" style="font-size: 1.1rem; padding: 0.25rem 0.65rem;">❤️</button>
+              <button class="btn btn-secondary btn-sm admin-react-btn" data-emoji="🔥" style="font-size: 1.1rem; padding: 0.25rem 0.65rem;">🔥</button>
+              <button class="btn btn-secondary btn-sm admin-react-btn" data-emoji="🎉" style="font-size: 1.1rem; padding: 0.25rem 0.65rem;">🎉</button>
+              <button class="btn btn-secondary btn-sm admin-react-btn" data-emoji="👏" style="font-size: 1.1rem; padding: 0.25rem 0.65rem;">👏</button>
+              <button class="btn btn-secondary btn-sm admin-react-btn" data-emoji="⭐" style="font-size: 1.1rem; padding: 0.25rem 0.65rem;">⭐</button>
             </div>
           </div>
         </div>
 
-        <!-- Live Status & TV Preview -->
-        <div class="glass-panel panel-card">
-          <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Display Status</h2>
-          <div style="display: flex; gap: 1.5rem; margin-top: 1rem;">
-            <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: var(--radius-md); flex: 1;">
-              <div style="color: var(--text-muted); font-size: 0.8rem;">Current Screen</div>
-              <div id="liveSlideVisitor" style="font-size: 1.15rem; font-weight: 700; color: #60a5fa; margin-top: 0.25rem;">Standby</div>
-              <div id="liveSlideMeta" style="font-size: 0.8rem; color: var(--text-secondary);">No active uploads</div>
+        <!-- Live Announcement Broadcaster -->
+        <div class="glass-panel panel-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+              <span style="font-size: 1.4rem;">📢</span>
+              <h2 style="font-size: 1.25rem; font-weight: 700;">Smart TV Announcement</h2>
             </div>
-            <div style="background: rgba(15, 23, 42, 0.8); padding: 1rem; border-radius: var(--radius-md); flex: 1;">
-              <div style="color: var(--text-muted); font-size: 0.8rem;">Pending Queue</div>
-              <div id="queueCountDisplay" style="font-size: 1.5rem; font-weight: 800; color: #34d399; margin-top: 0.25rem;">0</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary);">Batches waiting</div>
-            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+              Broadcast a banner alert or reminder directly onto all connected smart TV screens with an audio chime!
+            </p>
+
+            <form id="announcementForm">
+              <div style="display: grid; grid-template-columns: 1fr 140px; gap: 0.75rem;">
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label for="announcementTitleInput">Banner Title</label>
+                  <input type="text" id="announcementTitleInput" placeholder="e.g. Dinner Alert / Keynote" value="📢 Event Announcement">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label for="announcementIconSelect">Icon</label>
+                  <select id="announcementIconSelect">
+                    <option value="📢">📢 Loudspeaker</option>
+                    <option value="🍽️">🍽️ Dinner / Food</option>
+                    <option value="🏆">🏆 Award / Winner</option>
+                    <option value="🎉">🎉 Celebration</option>
+                    <option value="⏰">⏰ Time Alert</option>
+                    <option value="✨">✨ Special VIP</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="announcementMessageInput">Message to Display <span class="req">*</span></label>
+                <textarea id="announcementMessageInput" rows="3" placeholder="e.g. Dinner is now served in Banquet Hall B! Please proceed to the dining area." required style="width: 100%; resize: vertical;"></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <label for="announcementDurationSelect" style="font-size: 0.8rem; margin: 0; color: var(--text-muted);">Duration:</label>
+                  <select id="announcementDurationSelect" style="padding: 0.25rem 0.5rem; font-size: 0.82rem;">
+                    <option value="6">6 Seconds</option>
+                    <option value="10" selected>10 Seconds</option>
+                    <option value="15">15 Seconds</option>
+                    <option value="25">25 Seconds</option>
+                  </select>
+                </div>
+                <button type="submit" id="broadcastBtn" class="btn btn-primary btn-sm">
+                  🚀 Broadcast to TV
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div style="background: rgba(30, 58, 138, 0.25); border: 1px dashed rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 1rem; font-size: 0.78rem; color: #93c5fd;">
+            💡 Announcements immediately pop up in full view over photos with a distinct sound chime.
           </div>
         </div>
+      </div>
+
       <!-- Event Branding & Customization Settings -->
-      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
-        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">🎨 Event Branding & Visual Theme</h2>
+      <div class="glass-panel panel-card" style="margin-bottom: 1.75rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">🎨 Event Branding & Visual Theme Studio</h2>
         <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
-          Customize the event title, theme colors, and transition animations displayed across all screens in real time.
+          Customize the event name, tagline, color palette, and transition animations live across all TV screens without restart.
         </p>
 
-        <form id="brandingForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+        <form id="brandingForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem;">
           <div class="form-group" style="margin-bottom: 0;">
             <label for="brandEventName">Event Name</label>
             <input type="text" id="brandEventName" placeholder="e.g. Annual Tech Summit 2026">
@@ -171,7 +509,7 @@
 
           <div class="form-group" style="margin-bottom: 0;">
             <label for="brandEventTagline">Tagline / Subtitle</label>
-            <input type="text" id="brandEventTagline" placeholder="e.g. Welcome Guests & Innovators">
+            <input type="text" id="brandEventTagline" placeholder="e.g. Share your memories on the big screen">
           </div>
 
           <div class="form-group" style="margin-bottom: 0;">
@@ -190,36 +528,59 @@
             <select id="brandTransition">
               <option value="kenburns">Ken Burns Pan & Zoom</option>
               <option value="3d-flip">3D Card Flip</option>
-              <option value="zoom">Quick Dynamic Zoom</option>
+              <option value="zoom">Dynamic Zoom</option>
               <option value="smooth-fade">Smooth Crossfade</option>
             </select>
           </div>
 
           <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
-            <button type="submit" id="saveBrandingBtn" class="btn btn-primary btn-sm">💾 Save & Apply Branding</button>
+            <button type="submit" id="saveBrandingBtn" class="btn btn-primary btn-sm">💾 Save & Apply Live</button>
           </div>
         </form>
       </div>
 
       <!-- Photos Moderation Grid -->
-      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="glass-panel panel-card" style="margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
           <div>
-            <h2 style="font-size: 1.25rem; font-weight: 700;">Uploaded Photos & Moderation</h2>
-            <p style="color: var(--text-secondary); font-size: 0.85rem;">Instantly hide inappropriate photos from the live display.</p>
+            <h2 style="font-size: 1.25rem; font-weight: 700;">📸 Uploaded Photos & Moderation</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">Instantly hide inappropriate photos or restore previously moderated ones.</p>
           </div>
           <button id="refreshPhotosBtn" class="btn btn-secondary btn-sm">🔄 Refresh Photos</button>
         </div>
 
+        <!-- Filter & Search Toolbar -->
+        <div class="filter-bar">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; max-width: 320px;">
+            <span style="font-size: 0.9rem;">🔍</span>
+            <input type="text" id="photoSearchInput" placeholder="Search by visitor name..." style="padding: 0.3rem 0.6rem; font-size: 0.85rem; width: 100%;">
+          </div>
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all">All (<span id="countFilterAll">0</span>)</button>
+            <button class="filter-chip" data-filter="active">Active (<span id="countFilterActive">0</span>)</button>
+            <button class="filter-chip" data-filter="hidden">Hidden (<span id="countFilterHidden">0</span>)</button>
+          </div>
+        </div>
+
         <div id="photosGrid" class="photo-grid">
-          <p style="color: var(--text-muted);">Loading photos...</p>
+          <p style="color: var(--text-muted); grid-column: 1/-1;">Loading photos...</p>
         </div>
       </div>
 
       <!-- Visitor Directory Table -->
-      <div class="glass-panel panel-card" style="margin-bottom: 2rem;">
-        <h2 style="font-size: 1.25rem; font-weight: 700;">Registered Visitors Directory</h2>
-        <p style="color: var(--text-secondary); font-size: 0.85rem;">Identified visitors, visit frequencies, and consent records.</p>
+      <div class="glass-panel panel-card" style="margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700;">👥 Registered Visitors Directory</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">Identified visitors, visit frequencies, and public display consent status.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="visitorSearchInput" placeholder="Filter by name / email / phone..." style="padding: 0.35rem 0.75rem; font-size: 0.82rem; min-width: 220px;">
+            <button id="exportVisitorsBtn" class="btn btn-secondary btn-sm" title="Download visitors list as CSV file">
+              📥 Export CSV
+            </button>
+          </div>
+        </div>
 
         <div style="overflow-x: auto;">
           <table>
@@ -227,10 +588,10 @@
               <tr>
                 <th>Visitor Name</th>
                 <th>Identifier (Phone/Email)</th>
-                <th>Visits</th>
+                <th>Total Visits</th>
                 <th>Consent Status</th>
-                <th>First Visit</th>
-                <th>Latest Visit</th>
+                <th>First Visited</th>
+                <th>Latest Visited</th>
               </tr>
             </thead>
             <tbody id="visitorsTableBody">
@@ -242,17 +603,17 @@
 
       <!-- Privacy Audit Log -->
       <div class="glass-panel panel-card">
-        <h2 style="font-size: 1.25rem; font-weight: 700;">Privacy & Consent Audit Trail</h2>
-        <p style="color: var(--text-secondary); font-size: 0.85rem;">Immutable compliance log of consent grants, withdrawals, and takedowns.</p>
+        <h2 style="font-size: 1.25rem; font-weight: 700;">🛡️ Privacy & Consent Audit Trail</h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Immutable compliance log of consent grants, withdrawals, photo purges, and moderation takedowns.</p>
 
-        <div style="overflow-x: auto;">
+        <div style="overflow-x: auto; max-height: 380px;">
           <table>
             <thead>
               <tr>
                 <th>Timestamp</th>
                 <th>Action</th>
                 <th>Visitor ID</th>
-                <th>Details</th>
+                <th>Compliance Details</th>
               </tr>
             </thead>
             <tbody id="auditLogsBody">
@@ -263,6 +624,25 @@
       </div>
     </div>
   </main>
+
+  <!-- Photo Full-Screen Inspection Modal -->
+  <div id="photoModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalPhotoTitle" style="font-size: 1.1rem; font-weight: 700;">Photo Inspection</h3>
+        <button id="closeModalBtn" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="modalPhotoImg" src="" alt="Full Inspection Photo">
+        <div id="modalPhotoMeta" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary); text-align: left; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 6px;"></div>
+      </div>
+      <div style="padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: flex-end; gap: 0.5rem;" id="modalActions">
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="adminToast" class="admin-toast"></div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/admin.js"></script>

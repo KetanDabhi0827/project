@@ -138,6 +138,28 @@ class PhotoService {
   }
 
   /**
+   * Reactivates or restores a moderated photo.
+   */
+  async reactivatePhoto(photoId) {
+    const db = getDatabase();
+    const photo = await getAsync(db, `SELECT * FROM photos WHERE id = ?`, [photoId]);
+    if (!photo) {
+      throw new Error('Photo not found.');
+    }
+
+    await runAsync(db, `UPDATE photos SET is_active = 1 WHERE id = ?`, [photoId]);
+
+    const now = new Date().toISOString();
+    await runAsync(
+      db,
+      `INSERT INTO consent_logs (id, visitor_id, action, ip_hash, timestamp, details) VALUES (?, ?, ?, ?, ?, ?)`,
+      [uuidv4(), photo.visitor_id, 'PHOTO_RESTORED', 'system', now, `Photo ${photoId} restored to active display.`]
+    );
+
+    return { success: true, photoId };
+  }
+
+  /**
    * Purges expired photos past retention period.
    */
   async purgeExpiredPhotos() {

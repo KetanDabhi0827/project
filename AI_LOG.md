@@ -188,3 +188,18 @@ This document chronicles key interactions, prompt directives, and design steerin
   3. **Comprehensive Viva & Demo Guide (`DEMO_GUIDE.md`):** Authored a 2-minute live demo script with step-by-step instructions and deep technical answers to the top 10 anticipated academic/viva questions.
   4. **Free Cloud Deployment Blueprint (`render.yaml`):** Provided automated Render.com deployment configuration for 1-click cloud hosting.
 
+---
+
+## Log Entry 14: Comprehensive Admin Command Center & Live Screen Broadcaster
+* **User Directive (Gujarati):**  
+  > *"admin panel ne thodi better kari apo"*  
+  > *(Make the admin panel a bit better / improve the admin panel.)*
+* **AI Implementation:**  
+  1. **Top KPI Metrics Dashboard:** Added dynamic summary cards displaying Total Uploads, Active on Screen, Unique Visitors, Returning Guests, Queue Depth, and Active Theme styling.
+  2. **Live Screen Visual Monitor:** Embedded a real-time smart TV preview deck featuring a live thumbnail of the actively broadcasted photo, slide counter, and visitor meta, syncing instantly via Socket.IO.
+  3. **Smart TV Announcement Broadcaster:** Engineered `POST /api/admin/broadcast-announcement` and the on-screen banner engine in `tv.html` / `tv.js`, allowing event moderators to broadcast custom alerts, dinner calls, or VIP greetings with sound chimes.
+  4. **Photo Moderation Filtering & Zoom Modal:** Added search-as-you-type by visitor name, status filter chips (`All`, `Active on TV`, `Hidden / Moderated`), high-resolution photo inspection modal, and a `♻️ Restore to TV` action (`POST /api/admin/unmoderate-photo`).
+  5. **Visitor Directory Search & CSV Export:** Added client-side real-time visitor filtering and a dedicated `GET /api/admin/export-visitors` endpoint that streams downloadable CSV spreadsheets for event organizers.
+  6. **Moderator Cheer Blaster:** Embedded an instant emoji reaction bar directly in the admin console to blast live animations to the TV screen from the control room.
+  7. **Glassmorphic Toast Engine:** Replaced blocking browser `alert()` popups with responsive, non-blocking slide-in toasts.
+

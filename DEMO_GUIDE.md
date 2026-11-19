@@ -72,15 +72,26 @@ flowchart LR
 3. Click **`🗑️ Delete All My Photos & Revoke Consent`**.
 4. The system immediately purges the files from disk, anonymizes database records, and evicts all corresponding slides from the live TV broadcast queue within 50 milliseconds!
 
-### Step 7: Admin Control & Live Branding Studio
+### Step 7: Admin Command Center, Live Monitor & Announcements
 1. Open `http://localhost:3000/admin.html` (Password: `admin123`).
-2. Demonstrate real-time remote commands:
+2. Point out the **Top KPI Stat Cards**: Total Photos, Active on Screen, Registered Guests, Returning Guests, and Slide Speed.
+3. Observe the **Live Screen Monitor**: Displays an actual live preview thumbnail and visitor details of the slide currently playing on TV screens!
+4. Demonstrate real-time remote commands:
    - Click **`⏸ Pause`** / **`▶ Resume`** (immediately halts TV progress bar).
    - Change slide duration to **`3s`**, **`6s`**, or **`10s`**.
+   - Tap an emoji in the **Moderator Cheer** bar (`❤️`, `🔥`, `🎉`) to send live floating reactions directly from the control room.
+5. Broadcast a **Live Smart TV Announcement**:
+   - Type *"Dinner is served in Banquet Hall B!"*, select icon `🍽️`, duration `10s`, and click **`🚀 Broadcast to TV`**.
+   - Watch the TV screen immediately chime and display the vibrant banner overlay across all connected screens!
+6. Demonstrate **Photo Moderation & Inspection**:
+   - Filter photos by `Active on Display` or `Hidden`.
+   - Click a photo to open the high-resolution inspection modal.
+   - Click **`🚫 Hide from TV`** or **`♻️ Restore to TV`**.
+7. Filter visitors in the **Registered Visitors Directory** and click **`📥 Export CSV`** to show downloadable attendee spreadsheets.
+8. Customize **Event Branding**:
    - Change **Event Name** to *"University Tech Fest 2026"*.
    - Switch **Theme Color** from Blue to *Emerald* or *Purple*.
-   - Switch **Transition Effect** from Ken Burns to *3D Flip* or *Smooth Zoom*.
-   - Look at the TV screen: all styles and branding update dynamically via WebSockets without page reload!
+   - Switch **Transition Effect** to *3D Flip* or *Smooth Zoom*. All TV screens update live without reload!
 
 ---
 
