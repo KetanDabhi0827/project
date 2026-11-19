@@ -51,10 +51,19 @@
       <audio id="bgmAudio" loop preload="auto" src="/audio/bgm.mp3"></audio>
     </div>
 
-    <!-- Top Right: Up Next Queue Status -->
-    <div class="tv-overlay-top-right">
+    <!-- Top Right: Up Next Queue Status & Floating Corner QR -->
+    <div class="tv-overlay-top-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;">
       <div id="upNextPill" class="tv-up-next-pill" style="display: none;">
         <span>Up Next: <strong id="upNextText"></strong></span>
+      </div>
+
+      <!-- Persistent Floating Corner QR Badge (Always visible during slideshow so guests can scan anytime) -->
+      <div id="cornerQrBadge" class="tv-corner-qr" title="Scan with smartphone camera to add your photos! Click to expand (Key: Q)">
+        <img id="cornerQrImg" src="" alt="Scan QR to upload">
+        <div class="tv-corner-qr-meta">
+          <span class="tv-corner-qr-title">📸 Add Photos</span>
+          <span class="tv-corner-qr-sub">Scan with Phone</span>
+        </div>
       </div>
     </div>
 
@@ -71,6 +80,7 @@
         <button class="tv-speed-chip" data-speed="10">10s</button>
       </div>
 
+      <button id="tvQrModalBtn" class="tv-ctrl-btn" title="Show Big QR Code for Audience (Q)">📱 QR</button>
       <button id="tvRefreshBtn" class="tv-ctrl-btn" title="Refresh Reel">🔄</button>
     </div>
 
@@ -118,6 +128,25 @@
         <div id="announcementIcon" style="font-size: 2.8rem; margin-bottom: 0.25rem;">📢</div>
         <h1 id="announcementTitle" style="color: #ffffff; font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: 0.5px;">Live Announcement</h1>
         <p id="announcementText" style="color: #bfdbfe; font-size: 1.35rem; font-weight: 600; line-height: 1.4; margin: 0;"></p>
+      </div>
+    </div>
+
+    <!-- Expanded QR Code Overlay (For distant guests in the hall) -->
+    <div id="expandedQrOverlay" class="tv-expanded-qr-overlay" style="display: none;">
+      <div class="glass-panel tv-expanded-qr-card">
+        <button id="closeExpandedQrBtn" class="tv-qr-close-btn">&times;</button>
+        <div style="font-size: 2.8rem; margin-bottom: 0.25rem;">📸</div>
+        <h2 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+          Add Your Photos to the Screen!
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 1rem; max-width: 440px; margin: 0 auto 1.25rem;">
+          Open your smartphone camera and point it at this QR code to upload up to 5 photos live onto this smart TV screen.
+        </p>
+        <img id="expandedQrImg" class="tv-qr-image" style="width: 230px; height: 230px; border-radius: 14px; background: white; padding: 10px; margin: 0 auto; display: block;" alt="Scan to Upload">
+        <p id="expandedQrUrl" style="color: #60a5fa; font-weight: 700; font-size: 1.05rem; margin-top: 0.85rem; word-break: break-all;"></p>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem;">
+          Press <kbd style="background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px;">Q</kbd> or click ✕ to close
+        </div>
       </div>
     </div>
   </div>

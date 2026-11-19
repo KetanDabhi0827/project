@@ -696,6 +696,97 @@ body.tv-idle-hidden * {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Persistent Floating Corner QR Code Badge */
+.tv-corner-qr {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
+  pointer-events: auto;
+}
+.tv-corner-qr:hover {
+  transform: scale(1.05);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
+}
+.tv-corner-qr img {
+  width: 54px;
+  height: 54px;
+  background: white;
+  border-radius: 6px;
+  padding: 3px;
+  display: block;
+}
+.tv-corner-qr-meta {
+  display: flex;
+  flex-direction: column;
+}
+.tv-corner-qr-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  letter-spacing: 0.2px;
+}
+.tv-corner-qr-sub {
+  font-size: 0.7rem;
+  color: #93c5fd;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+/* Expanded QR Code Overlay (For distant guests) */
+.tv-expanded-qr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(14px);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: popIn 0.3s ease;
+}
+.tv-expanded-qr-card {
+  text-align: center;
+  padding: 2.5rem 3rem;
+  max-width: 520px;
+  width: 90%;
+  position: relative;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  box-shadow: 0 0 50px rgba(59, 130, 246, 0.35);
+}
+.tv-qr-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.tv-qr-close-btn:hover {
+  background: rgba(239, 68, 68, 0.6);
+}
+
 /* ==========================================================================
    Comprehensive Smart TV & Mobile Display Optimization
    ========================================================================== */

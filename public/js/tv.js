@@ -34,6 +34,15 @@ const volumeIcon = document.getElementById('volumeIcon');
 const overlayTopLeft = document.querySelector('.tv-overlay-top-left');
 const overlayTopRight = document.querySelector('.tv-overlay-top-right');
 
+// Corner & Expanded QR Code Elements
+const cornerQrBadge = document.getElementById('cornerQrBadge');
+const cornerQrImg = document.getElementById('cornerQrImg');
+const expandedQrOverlay = document.getElementById('expandedQrOverlay');
+const expandedQrImg = document.getElementById('expandedQrImg');
+const expandedQrUrl = document.getElementById('expandedQrUrl');
+const closeExpandedQrBtn = document.getElementById('closeExpandedQrBtn');
+const tvQrModalBtn = document.getElementById('tvQrModalBtn');
+
 // Interactive Control Bar
 const tvControlBar = document.getElementById('tvControlBar');
 const tvPrevBtn = document.getElementById('tvPrevBtn');
@@ -266,18 +275,37 @@ function toggleFullscreen() {
   }
 }
 
-// Load QR code for Standby Card
+// Load QR code for Standby Card & Corner Badge
 async function loadStandbyQR() {
   try {
     const res = await fetch('/api/slideshow/qr');
     const data = await res.json();
     if (data.success && data.qrDataUrl) {
-      qrCodeImg.src = data.qrDataUrl;
-      qrUrlText.textContent = data.url;
+      if (qrCodeImg) qrCodeImg.src = data.qrDataUrl;
+      if (qrUrlText) qrUrlText.textContent = data.url;
+      if (cornerQrImg) cornerQrImg.src = data.qrDataUrl;
+      if (expandedQrImg) expandedQrImg.src = data.qrDataUrl;
+      if (expandedQrUrl) expandedQrUrl.textContent = data.url;
     }
   } catch (err) {
     console.warn('Could not load QR code:', err);
   }
+}
+
+// Toggle Expanded Full-Screen QR Code Overlay
+function toggleExpandedQr() {
+  if (!expandedQrOverlay) return;
+  const isHidden = expandedQrOverlay.style.display === 'none' || !expandedQrOverlay.style.display;
+  expandedQrOverlay.style.display = isHidden ? 'flex' : 'none';
+}
+
+if (cornerQrBadge) cornerQrBadge.addEventListener('click', toggleExpandedQr);
+if (tvQrModalBtn) tvQrModalBtn.addEventListener('click', toggleExpandedQr);
+if (closeExpandedQrBtn) closeExpandedQrBtn.addEventListener('click', () => { expandedQrOverlay.style.display = 'none'; });
+if (expandedQrOverlay) {
+  expandedQrOverlay.addEventListener('click', (e) => {
+    if (e.target === expandedQrOverlay) expandedQrOverlay.style.display = 'none';
+  });
 }
 
 // Auto-advance progress bar
@@ -322,6 +350,7 @@ function displaySlide(slide) {
     bottomOverlay.style.display = 'none';
     backgroundBlur.style.backgroundImage = 'none';
     standbyCard.style.display = 'block';
+    if (cornerQrBadge) cornerQrBadge.style.display = 'none';
     loadStandbyQR();
     scheduleFailSafe(5);
     return;
@@ -329,6 +358,7 @@ function displaySlide(slide) {
 
   // Active Photo Slide
   standbyCard.style.display = 'none';
+  if (cornerQrBadge) cornerQrBadge.style.display = 'flex';
 
   // Determine incoming vs outgoing image buffer
   const incomingImg = activeBuffer === 'A' ? slideImageB : slideImageA;
@@ -569,6 +599,18 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       audioToggleBtn.click();
       break;
+
+    case 'q':
+    case 'Q':
+      e.preventDefault();
+      toggleExpandedQr();
+      break;
+
+    case 'Escape':
+      if (expandedQrOverlay && expandedQrOverlay.style.display !== 'none') {
+        expandedQrOverlay.style.display = 'none';
+      }
+      break;
   }
 });
 
@@ -807,6 +849,7 @@ async function loadInitialSettings() {
 }
 
 loadInitialSettings();
+loadStandbyQR();
 
 socket.on('slideshow:branding-update', (branding) => {
   applyBrandingSettings(branding);
