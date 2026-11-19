@@ -203,3 +203,18 @@ This document chronicles key interactions, prompt directives, and design steerin
   6. **Moderator Cheer Blaster:** Embedded an instant emoji reaction bar directly in the admin console to blast live animations to the TV screen from the control room.
   7. **Glassmorphic Toast Engine:** Replaced blocking browser `alert()` popups with responsive, non-blocking slide-in toasts.
 
+---
+
+## Log Entry 15: Case 6 — AI Mistake: Corner QR Code Bound to Auto-Hide Container
+* **User Directive (Gujarati):**  
+  > *"jiyare aa sound na aena option hide thay tyre qr pan hide thay jay to aenu kaik karo"*  
+  > *(When sound and other options hide on the TV screen, the QR code also gets hidden; fix that.)*
+* **What the AI Did Wrong:**  
+  When adding the persistent floating corner QR badge, the AI initially nested `<div id="cornerQrBadge">` inside the existing `<div class="tv-overlay-top-right">` container. Consequently, when the 3.5-second idle auto-hide timer fired and added `.autohide` to `.tv-overlay-top-right`, the QR badge was hidden along with the music, volume, and control bars.
+* **How We Noticed:**  
+  User explicitly pointed out that when the control dock and sound controls auto-hide during playback, the QR code badge also disappeared, preventing newly arrived guests from scanning.
+* **How We Fixed It:**  
+  1. Decoupled `#cornerQrBadge` completely from `.tv-overlay-top-right` into its own standalone DOM element under `#tvContainer`.
+  2. Applied permanent fixed visibility styling: `opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;` in `styles.css`.
+  3. Repositioned `.tv-overlay-top-right` (holding the "Up Next" queue pill) to sit neatly to the left of the corner QR badge, ensuring zero overlap while allowing the pill and controls to autohide cleanly without affecting QR visibility.
+
