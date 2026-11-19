@@ -41,7 +41,6 @@ const expandedQrOverlay = document.getElementById('expandedQrOverlay');
 const expandedQrImg = document.getElementById('expandedQrImg');
 const expandedQrUrl = document.getElementById('expandedQrUrl');
 const closeExpandedQrBtn = document.getElementById('closeExpandedQrBtn');
-const tvQrModalBtn = document.getElementById('tvQrModalBtn');
 
 // Interactive Control Bar
 const tvControlBar = document.getElementById('tvControlBar');
@@ -300,7 +299,6 @@ function toggleExpandedQr() {
 }
 
 if (cornerQrBadge) cornerQrBadge.addEventListener('click', toggleExpandedQr);
-if (tvQrModalBtn) tvQrModalBtn.addEventListener('click', toggleExpandedQr);
 if (closeExpandedQrBtn) closeExpandedQrBtn.addEventListener('click', () => { expandedQrOverlay.style.display = 'none'; });
 if (expandedQrOverlay) {
   expandedQrOverlay.addEventListener('click', (e) => {
