@@ -42,6 +42,10 @@ class QueueService extends EventEmitter {
     return this.slideDurationSeconds;
   }
 
+  getCurrentSlide() {
+    return this.currentSlide;
+  }
+
   async refreshAmbientReel() {
     try {
       this.ambientPhotos = await photoService.getAmbientReelPhotos(25);

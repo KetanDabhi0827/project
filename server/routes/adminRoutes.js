@@ -60,7 +60,7 @@ router.get('/stats', async (req, res, next) => {
     );
 
     const queueSummary = queueService.getQueueSummary();
-    const currentSlide = queueService.getCurrentSlide();
+    const currentSlide = queueService.currentSlide;
 
     res.json({
       success: true,
