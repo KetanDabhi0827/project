@@ -530,9 +530,9 @@ body.theme-amber {
 
 .tv-overlay-top-right {
   position: absolute;
-  top: 2rem;
-  right: 2.5rem;
-  z-index: 10;
+  top: 1.5rem;
+  right: 14.5rem;
+  z-index: 80;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -595,6 +595,11 @@ body.theme-amber {
 body.tv-idle-hidden,
 body.tv-idle-hidden * {
   cursor: none !important;
+}
+
+body.tv-idle-hidden .tv-corner-qr,
+body.tv-idle-hidden .tv-corner-qr * {
+  cursor: pointer !important;
 }
 
 .tv-visitor-card {
@@ -698,6 +703,10 @@ body.tv-idle-hidden * {
 
 /* Persistent Floating Corner QR Code Badge */
 .tv-corner-qr {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 95;
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -708,8 +717,10 @@ body.tv-idle-hidden * {
   cursor: pointer;
   backdrop-filter: blur(12px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
-  pointer-events: auto;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 .tv-corner-qr:hover {
   transform: scale(1.05);
@@ -976,6 +987,31 @@ body.tv-idle-hidden * {
 
   #celebrationSubtitle {
     font-size: 0.85rem !important;
+  }
+
+  /* Persistent Corner QR on Mobile */
+  .tv-corner-qr {
+    top: 0.6rem !important;
+    right: 0.6rem !important;
+    padding: 0.3rem 0.5rem !important;
+    z-index: 95 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .tv-corner-qr img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .tv-corner-qr-title {
+    font-size: 0.72rem !important;
+  }
+  .tv-corner-qr-sub {
+    font-size: 0.6rem !important;
+  }
+  .tv-overlay-top-right {
+    top: 3.8rem !important;
+    right: 0.6rem !important;
+    z-index: 80 !important;
   }
 }
 

@@ -51,19 +51,19 @@
       <audio id="bgmAudio" loop preload="auto" src="/audio/bgm.mp3"></audio>
     </div>
 
-    <!-- Top Right: Up Next Queue Status & Floating Corner QR -->
-    <div class="tv-overlay-top-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;">
+    <!-- Top Right: Up Next Queue Status (Auto-hides on idle) -->
+    <div class="tv-overlay-top-right">
       <div id="upNextPill" class="tv-up-next-pill" style="display: none;">
         <span>Up Next: <strong id="upNextText"></strong></span>
       </div>
+    </div>
 
-      <!-- Persistent Floating Corner QR Badge (Always visible during slideshow so guests can scan anytime) -->
-      <div id="cornerQrBadge" class="tv-corner-qr" title="Scan with smartphone camera to add your photos! Click to expand (Key: Q)">
-        <img id="cornerQrImg" src="" alt="Scan QR to upload">
-        <div class="tv-corner-qr-meta">
-          <span class="tv-corner-qr-title">📸 Add Photos</span>
-          <span class="tv-corner-qr-sub">Scan with Phone</span>
-        </div>
+    <!-- Persistent Floating Corner QR Badge (Permanently visible on screen, NEVER hidden when controls/sound hide) -->
+    <div id="cornerQrBadge" class="tv-corner-qr" title="Scan with smartphone camera to add your photos! Click to expand (Key: Q)">
+      <img id="cornerQrImg" src="" alt="Scan QR to upload">
+      <div class="tv-corner-qr-meta">
+        <span class="tv-corner-qr-title">📸 Add Photos</span>
+        <span class="tv-corner-qr-sub">Scan with Phone</span>
       </div>
     </div>
 
