@@ -314,6 +314,7 @@
       <nav class="nav-links">
         <a href="/" class="nav-link" target="_blank">📸 Visitor Upload</a>
         <a href="/tv.html" class="nav-link" target="_blank" style="color: #60a5fa; font-weight: 700;">📺 Smart TV Screen</a>
+        <button id="adminLogoutBtn" class="btn btn-secondary btn-sm" style="display: none; padding: 0.3rem 0.65rem; font-size: 0.78rem;" title="Lock Admin Session">🔒 Lock</button>
       </nav>
     </div>
   </header>
@@ -324,14 +325,19 @@
       <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">🔐</div>
       <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 800;">Admin Authentication</h2>
       <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem;">
-        Enter your Admin Key to manage live broadcasts, moderation, and event branding.
+        Enter your Admin Pass Key to manage live broadcasts, moderation, and event branding.
       </p>
-      <div class="form-group">
-        <input type="password" id="adminKeyInput" placeholder="Admin API Key" value="admin123" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
-      </div>
-      <button id="authBtn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Unlock Command Center</button>
-      <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-muted);">
-        Default local key: <code>admin123</code> (configured in <code>.env</code>)
+
+      <form id="authForm">
+        <div class="form-group" style="position: relative; margin-bottom: 1rem;">
+          <input type="password" id="adminKeyInput" placeholder="Enter Admin Pass Key" value="admin123" required autocomplete="current-password" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px; padding-right: 2.5rem;">
+          <button type="button" id="togglePasswordVisibilityBtn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-secondary); padding: 4px;" title="Show / Hide Pass Key">👁️</button>
+        </div>
+        <button type="submit" id="authBtn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Unlock Command Center</button>
+      </form>
+
+      <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-muted); background: rgba(15, 23, 42, 0.6); padding: 0.5rem; border-radius: 6px;">
+        Default key: <code>admin123</code> (Press Enter to unlock)
       </div>
     </div>
 
@@ -539,6 +545,28 @@
         </form>
       </div>
 
+      <!-- Admin Pass Key & Security Settings -->
+      <div class="glass-panel panel-card" style="margin-bottom: 1.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <span style="font-size: 1.4rem;">🔑</span>
+          <h2 style="font-size: 1.25rem; font-weight: 700;">Admin Pass Key & Security</h2>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
+          Update your Admin Pass Key dynamically without editing the server <code>.env</code> file or restarting the server.
+        </p>
+
+        <form id="changePassKeyForm" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+          <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 240px; position: relative;">
+            <label for="newAdminKeyInput">New Admin Pass Key</label>
+            <input type="password" id="newAdminKeyInput" placeholder="Enter new pass key (min 4 characters)" required minlength="4" style="padding-right: 2.5rem;">
+            <button type="button" id="toggleNewKeyVisibilityBtn" style="position: absolute; right: 8px; bottom: 8px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-secondary); padding: 4px;" title="Show / Hide Pass Key">👁️</button>
+          </div>
+          <button type="submit" id="savePassKeyBtn" class="btn btn-primary btn-sm" style="padding: 0.55rem 1.25rem;">
+            Update Pass Key
+          </button>
+        </form>
+      </div>
+
       <!-- Photos Moderation Grid -->
       <div class="glass-panel panel-card" style="margin-bottom: 1.75rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
@@ -588,6 +616,7 @@
               <tr>
                 <th>Visitor Name</th>
                 <th>Identifier (Phone/Email)</th>
+                <th>Pass Key / PIN</th>
                 <th>Total Visits</th>
                 <th>Consent Status</th>
                 <th>First Visited</th>
@@ -595,7 +624,7 @@
               </tr>
             </thead>
             <tbody id="visitorsTableBody">
-              <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading visitors...</td></tr>
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading visitors...</td></tr>
             </tbody>
           </table>
         </div>

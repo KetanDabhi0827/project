@@ -1,17 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const config = require('../config');
-const { getDatabase, allAsync, getAsync } = require('../db/database');
+const { getDatabase, allAsync, getAsync, runAsync } = require('../db/database');
 const photoService = require('../services/photoService');
 const queueService = require('../services/queueService');
 
-// Middleware to check admin API key
-function checkAdminAuth(req, res, next) {
-  const key = req.headers['x-admin-key'] || req.query.adminKey || req.body.adminKey;
-  if (!key || key !== config.adminApiKey) {
-    return res.status(401).json({ success: false, error: 'Unauthorized: Invalid Admin API key.' });
+// Middleware to check admin API key (checks database override or .env config)
+async function checkAdminAuth(req, res, next) {
+  try {
+    const key = req.headers['x-admin-key'] || req.query.adminKey || (req.body && req.body.adminKey);
+    if (!key) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Admin pass key required.' });
+    }
+
+    const db = getDatabase();
+    const row = await getAsync(db, `SELECT value FROM slideshow_settings WHERE key = 'admin_api_key'`);
+    const validKey = (row && row.value) || config.adminApiKey || 'admin123';
+
+    if (key.trim() !== validKey.trim()) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Invalid Admin pass key.' });
+    }
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 }
 
 router.use(checkAdminAuth);
@@ -24,7 +36,7 @@ router.get('/visitors', async (req, res, next) => {
     const db = getDatabase();
     const visitors = await allAsync(
       db,
-      `SELECT id, name, identifier, visit_count, consent_given, consent_timestamp, first_visited_at, last_visited_at
+      `SELECT id, name, identifier, pin, visit_count, consent_given, consent_timestamp, first_visited_at, last_visited_at
        FROM visitors
        ORDER BY last_visited_at DESC`
     );
@@ -91,16 +103,17 @@ router.get('/export-visitors', async (req, res, next) => {
     const db = getDatabase();
     const visitors = await allAsync(
       db,
-      `SELECT id, name, identifier, visit_count, consent_given, first_visited_at, last_visited_at
+      `SELECT id, name, identifier, pin, visit_count, consent_given, first_visited_at, last_visited_at
        FROM visitors
        ORDER BY last_visited_at DESC`
     );
 
-    const headers = ['Visitor ID', 'Name', 'Identifier', 'Visit Count', 'Consent Given', 'First Visited At', 'Last Visited At'];
+    const headers = ['Visitor ID', 'Name', 'Identifier', 'Pass Key / PIN', 'Visit Count', 'Consent Given', 'First Visited At', 'Last Visited At'];
     const rows = visitors.map((v) => [
       `"${v.id}"`,
       `"${(v.name || '').replace(/"/g, '""')}"`,
       `"${(v.identifier || '').replace(/"/g, '""')}"`,
+      `"${v.pin || ''}"`,
       v.visit_count,
       v.consent_given ? 'Yes' : 'No',
       `"${v.first_visited_at || ''}"`,
@@ -111,6 +124,31 @@ router.get('/export-visitors', async (req, res, next) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="visitors_export.csv"');
     res.send(csvContent);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/admin/change-key
+ * Updates the admin pass key dynamically
+ */
+router.post('/change-key', async (req, res, next) => {
+  try {
+    const rawKey = req.body && (req.body.newAdminKey || req.body.newKey);
+    const newKey = typeof rawKey === 'string' ? rawKey.trim() : '';
+    if (!newKey || newKey.length < 4) {
+      return res.status(400).json({ success: false, error: 'New pass key must be at least 4 characters long.' });
+    }
+
+    const db = getDatabase();
+    await runAsync(
+      db,
+      `INSERT OR REPLACE INTO slideshow_settings (key, value) VALUES ('admin_api_key', ?)`,
+      [newKey]
+    );
+
+    res.json({ success: true, message: 'Admin pass key updated successfully!' });
   } catch (err) {
     next(err);
   }

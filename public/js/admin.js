@@ -13,10 +13,19 @@ let currentSlideDuration = 6;
 // DOM Elements - Auth
 const authPanel = document.getElementById('authPanel');
 const dashboardSection = document.getElementById('dashboardSection');
+const authForm = document.getElementById('authForm');
 const adminKeyInput = document.getElementById('adminKeyInput');
+const togglePasswordVisibilityBtn = document.getElementById('togglePasswordVisibilityBtn');
 const authBtn = document.getElementById('authBtn');
+const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 const socketStatusDot = document.getElementById('socketStatusDot');
 const adminToast = document.getElementById('adminToast');
+
+// DOM Elements - Change Admin Pass Key
+const changePassKeyForm = document.getElementById('changePassKeyForm');
+const newAdminKeyInput = document.getElementById('newAdminKeyInput');
+const toggleNewKeyVisibilityBtn = document.getElementById('toggleNewKeyVisibilityBtn');
+const savePassKeyBtn = document.getElementById('savePassKeyBtn');
 
 // DOM Elements - KPIs
 const kpiTotalPhotos = document.getElementById('kpiTotalPhotos');
@@ -95,42 +104,148 @@ function showToast(message, isError = false) {
 
 // Authentication Verification
 async function verifyAdminKey(key) {
+  if (!key) return 'invalid_key';
   try {
     const res = await fetch('/api/admin/stats', {
       headers: { 'x-admin-key': key },
     });
-    return res.ok;
+    if (res.ok) return 'ok';
+    if (res.status === 401 || res.status === 403) return 'invalid_key';
+    return 'server_error';
   } catch (err) {
-    return false;
+    return 'network_error';
   }
 }
 
 async function initAdmin() {
-  const isValid = await verifyAdminKey(adminKey);
-  if (isValid) {
+  const status = await verifyAdminKey(adminKey);
+  if (status === 'ok') {
     authPanel.style.display = 'none';
     dashboardSection.style.display = 'block';
+    if (adminLogoutBtn) adminLogoutBtn.style.display = 'inline-block';
     loadAllAdminData();
   } else {
     authPanel.style.display = 'block';
     dashboardSection.style.display = 'none';
+    if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
   }
 }
 
-authBtn.addEventListener('click', async () => {
-  const key = adminKeyInput.value.trim();
-  const isValid = await verifyAdminKey(key);
-  if (isValid) {
+async function handleLogin(e) {
+  if (e) e.preventDefault();
+  const key = (adminKeyInput ? adminKeyInput.value : '').trim();
+  if (!key) {
+    showToast('Please enter the Admin Pass Key.', true);
+    return;
+  }
+
+  if (authBtn) {
+    authBtn.disabled = true;
+    authBtn.textContent = 'Verifying...';
+  }
+
+  const status = await verifyAdminKey(key);
+
+  if (authBtn) {
+    authBtn.disabled = false;
+    authBtn.textContent = 'Unlock Command Center';
+  }
+
+  if (status === 'ok') {
     adminKey = key;
     localStorage.setItem('slideshow_admin_key', key);
     authPanel.style.display = 'none';
     dashboardSection.style.display = 'block';
+    if (adminLogoutBtn) adminLogoutBtn.style.display = 'inline-block';
     loadAllAdminData();
     showToast('Admin Command Center unlocked successfully!');
+  } else if (status === 'invalid_key') {
+    showToast('Invalid Admin Pass Key. Default is admin123', true);
+  } else if (status === 'network_error') {
+    showToast('Unable to connect to server. Is the Node server running?', true);
   } else {
-    showToast('Invalid Admin API key. Check .env configuration.', true);
+    showToast('Server returned an error. Check server logs.', true);
   }
-});
+}
+
+if (authForm) {
+  authForm.addEventListener('submit', handleLogin);
+} else if (authBtn) {
+  authBtn.addEventListener('click', handleLogin);
+}
+
+if (togglePasswordVisibilityBtn && adminKeyInput) {
+  togglePasswordVisibilityBtn.addEventListener('click', () => {
+    const isPassword = adminKeyInput.type === 'password';
+    adminKeyInput.type = isPassword ? 'text' : 'password';
+    togglePasswordVisibilityBtn.textContent = isPassword ? '🙈' : '👁️';
+  });
+}
+
+if (adminLogoutBtn) {
+  adminLogoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('slideshow_admin_key');
+    authPanel.style.display = 'block';
+    dashboardSection.style.display = 'none';
+    adminLogoutBtn.style.display = 'none';
+    if (adminKeyInput) {
+      adminKeyInput.value = '';
+      adminKeyInput.focus();
+    }
+    showToast('Admin locked out.');
+  });
+}
+
+// Change Admin Pass Key Handler
+if (toggleNewKeyVisibilityBtn && newAdminKeyInput) {
+  toggleNewKeyVisibilityBtn.addEventListener('click', () => {
+    const isPassword = newAdminKeyInput.type === 'password';
+    newAdminKeyInput.type = isPassword ? 'text' : 'password';
+    toggleNewKeyVisibilityBtn.textContent = isPassword ? '🙈' : '👁️';
+  });
+}
+
+if (changePassKeyForm) {
+  changePassKeyForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newKey = (newAdminKeyInput ? newAdminKeyInput.value : '').trim();
+    if (!newKey || newKey.length < 4) {
+      showToast('Pass key must be at least 4 characters long.', true);
+      return;
+    }
+    if (savePassKeyBtn) {
+      savePassKeyBtn.disabled = true;
+      savePassKeyBtn.textContent = 'Saving...';
+    }
+    try {
+      const res = await fetch('/api/admin/change-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+        },
+        body: JSON.stringify({ newAdminKey: newKey }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        adminKey = newKey;
+        localStorage.setItem('slideshow_admin_key', newKey);
+        if (adminKeyInput) adminKeyInput.value = newKey;
+        if (newAdminKeyInput) newAdminKeyInput.value = '';
+        showToast('✅ Admin Pass Key updated successfully! Use this new key next time.');
+      } else {
+        showToast(data.error || 'Failed to update pass key.', true);
+      }
+    } catch (err) {
+      showToast('Network error while updating pass key.', true);
+    } finally {
+      if (savePassKeyBtn) {
+        savePassKeyBtn.disabled = false;
+        savePassKeyBtn.textContent = 'Update Pass Key';
+      }
+    }
+  });
+}
 
 // Load All Admin Data
 async function loadAllAdminData() {
@@ -611,16 +726,21 @@ function renderFilteredVisitors() {
 
   visitorsTableBody.innerHTML = '';
   if (filtered.length === 0) {
-    visitorsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No visitors match your search.</td></tr>';
+    visitorsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No visitors match your search.</td></tr>';
     return;
   }
 
   filtered.forEach((v) => {
     const row = document.createElement('tr');
     const isConsent = v.consent_given === 1;
+    const pinBadge = v.pin
+      ? `<span style="font-family: monospace; font-size: 0.88rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); padding: 0.15rem 0.5rem; border-radius: 4px; color: #93c5fd; letter-spacing: 1px;">${v.pin}</span>`
+      : '<span style="color: var(--text-muted); font-size: 0.75rem;">None</span>';
+
     row.innerHTML = `
       <td><strong>${v.name}</strong></td>
       <td><code>${v.identifier}</code></td>
+      <td>${pinBadge}</td>
       <td><span style="font-weight: 700; color: #60a5fa;">${v.visit_count} visit(s)</span></td>
       <td>${isConsent ? '<span style="color: #34d399; font-weight: 600;">✅ Consented</span>' : '<span style="color: #f87171; font-weight: 600;">❌ Revoked</span>'}</td>
       <td style="font-size: 0.8rem; color: var(--text-muted);">${new Date(v.first_visited_at).toLocaleString()}</td>
