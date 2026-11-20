@@ -330,14 +330,17 @@
 
       <form id="authForm">
         <div class="form-group" style="position: relative; margin-bottom: 1rem;">
-          <input type="password" id="adminKeyInput" placeholder="Enter Admin Pass Key" value="admin123" required autocomplete="current-password" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px; padding-right: 2.5rem;">
+          <input type="password" id="adminKeyInput" placeholder="Enter Admin Pass Key" required autocomplete="current-password" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px; padding-right: 2.5rem;">
           <button type="button" id="togglePasswordVisibilityBtn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-secondary); padding: 4px;" title="Show / Hide Pass Key">👁️</button>
         </div>
         <button type="submit" id="authBtn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Unlock Command Center</button>
       </form>
 
-      <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-muted); background: rgba(15, 23, 42, 0.6); padding: 0.5rem; border-radius: 6px;">
-        Default key: <code>admin123</code> (Press Enter to unlock)
+      <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-muted); background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: 6px; text-align: left; line-height: 1.5;">
+        <div>🔑 <strong>Default Master Key:</strong> <code>admin123</code> (For event hosts)</div>
+        <div style="margin-top: 0.45rem; color: #94a3b8; font-size: 0.76rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.45rem;">
+          💡 <strong>Looking for Visitor PIN?</strong> If you want to delete or manage your uploaded photos with your 4-digit PIN, please open the <a href="/" style="color: #60a5fa; text-decoration: underline; font-weight: 600;">Photo Upload Page</a> and click the <em>"Delete My Photos"</em> tab.
+        </div>
       </div>
     </div>
 

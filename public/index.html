@@ -177,7 +177,6 @@
         <span class="desktop-text">📺 Open TV Slideshow</span>
         <span class="mobile-text">📺 TV</span>
       </a>
-      <a href="/admin.html" class="nav-link" target="_blank">⚙️ Admin</a>
     </nav>
   </header>
 
@@ -214,7 +213,10 @@
           <div style="font-size: 0.82rem; color: #93c5fd;">
             <span>🎟️</span> <strong>Returning with a Pass?</strong>
           </div>
-          <button type="button" id="enterPassCodeBtn" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; border-color: rgba(96, 165, 250, 0.3);">1-Click Auto-fill</button>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button type="button" id="enterPassCodeBtn" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; border-color: rgba(96, 165, 250, 0.3);">1-Click Auto-fill</button>
+            <button type="button" id="clearPassBtn" class="btn btn-secondary btn-sm" style="display: none; padding: 0.25rem 0.45rem; font-size: 0.75rem; color: #f87171; border-color: rgba(239, 68, 68, 0.3);" title="Clear saved pass / Enter different person">✕</button>
+          </div>
         </div>
 
         <form id="uploadForm">
@@ -281,6 +283,11 @@
             <div style="font-size: 0.85rem; color: var(--text-muted);">Your Personal Deletion PIN:</div>
             <div id="displayPin" style="font-size: 1.5rem; font-weight: 800; color: #60a5fa; letter-spacing: 2px;"></div>
             <small style="color: var(--text-secondary); font-size: 0.8rem;">Save this PIN if you wish to remove your photos from the screen later.</small>
+            <div style="margin-top: 0.75rem;">
+              <button type="button" id="quickManagePhotosBtn" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; border-color: rgba(96, 165, 250, 0.35); padding: 0.3rem 0.75rem;">
+                🛡️ Manage / Delete Photos with this PIN &rarr;
+              </button>
+            </div>
           </div>
 
           <!-- Digital Event Pass Card -->
@@ -356,6 +363,16 @@
       </section>
     </div>
   </main>
+
+  <!-- Discreet Organizer Footer -->
+  <footer style="margin-top: 2rem; padding: 1.5rem 1rem 2rem; text-align: center; color: var(--text-muted); font-size: 0.78rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+    <div style="opacity: 0.8;">Live Event Photo Hub &bull; Smart TV Slideshow</div>
+    <div style="margin-top: 0.5rem;">
+      <a href="/admin.html" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 0.75rem; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+        🔒 Organizer Login
+      </a>
+    </div>
+  </footer>
 
   <!-- Notification Toast -->
   <div id="toast" class="toast"></div>

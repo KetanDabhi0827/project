@@ -1,6 +1,6 @@
 // Admin & Event Command Center Controller
 
-let adminKey = localStorage.getItem('slideshow_admin_key') || 'admin123';
+let adminKey = '';
 const socket = io();
 
 // Cache
@@ -117,17 +117,21 @@ async function verifyAdminKey(key) {
   }
 }
 
-async function initAdmin() {
-  const status = await verifyAdminKey(adminKey);
-  if (status === 'ok') {
-    authPanel.style.display = 'none';
-    dashboardSection.style.display = 'block';
-    if (adminLogoutBtn) adminLogoutBtn.style.display = 'inline-block';
-    loadAllAdminData();
-  } else {
-    authPanel.style.display = 'block';
-    dashboardSection.style.display = 'none';
-    if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
+function initAdmin() {
+  adminKey = '';
+  try {
+    localStorage.removeItem('slideshow_admin_key');
+    sessionStorage.removeItem('slideshow_admin_key');
+  } catch (e) {}
+
+  if (authPanel) authPanel.style.display = 'block';
+  if (dashboardSection) dashboardSection.style.display = 'none';
+  if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
+  if (adminKeyInput) {
+    adminKeyInput.value = '';
+    setTimeout(() => {
+      if (adminKeyInput) adminKeyInput.focus();
+    }, 150);
   }
 }
 
@@ -153,14 +157,17 @@ async function handleLogin(e) {
 
   if (status === 'ok') {
     adminKey = key;
-    localStorage.setItem('slideshow_admin_key', key);
     authPanel.style.display = 'none';
     dashboardSection.style.display = 'block';
     if (adminLogoutBtn) adminLogoutBtn.style.display = 'inline-block';
     loadAllAdminData();
     showToast('Admin Command Center unlocked successfully!');
   } else if (status === 'invalid_key') {
-    showToast('Invalid Admin Pass Key. Default is admin123', true);
+    if (/^\d{4}$/.test(key)) {
+      showToast('⚠️ That is a 4-digit Visitor PIN! Admin Master Key is required (default: admin123). To delete photos with your PIN, visit the Photo Upload Page.', true);
+    } else {
+      showToast('Invalid Admin Pass Key. Default master key is admin123', true);
+    }
   } else if (status === 'network_error') {
     showToast('Unable to connect to server. Is the Node server running?', true);
   } else {
@@ -229,7 +236,6 @@ if (changePassKeyForm) {
       const data = await res.json();
       if (data.success) {
         adminKey = newKey;
-        localStorage.setItem('slideshow_admin_key', newKey);
         if (adminKeyInput) adminKeyInput.value = newKey;
         if (newAdminKeyInput) newAdminKeyInput.value = '';
         showToast('✅ Admin Pass Key updated successfully! Use this new key next time.');

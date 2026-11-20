@@ -424,6 +424,8 @@ if (copyPassLinkBtn) {
   });
 }
 
+const clearPassBtn = document.getElementById('clearPassBtn');
+
 function updateAutoFillBtnState() {
   if (!enterPassCodeBtn) return;
   try {
@@ -436,9 +438,30 @@ function updateAutoFillBtnState() {
         enterPassCodeBtn.style.background = 'rgba(59, 130, 246, 0.2)';
         enterPassCodeBtn.style.color = '#93c5fd';
         enterPassCodeBtn.title = `1-Click Fill as ${pass.name}`;
+        if (clearPassBtn) clearPassBtn.style.display = 'inline-block';
+        return;
       }
     }
   } catch (e) {}
+
+  enterPassCodeBtn.innerHTML = '1-Click Auto-fill';
+  enterPassCodeBtn.style.background = '';
+  enterPassCodeBtn.style.color = '';
+  enterPassCodeBtn.title = '';
+  if (clearPassBtn) clearPassBtn.style.display = 'none';
+}
+
+if (clearPassBtn) {
+  clearPassBtn.addEventListener('click', () => {
+    try {
+      localStorage.removeItem('savedVisitorPass');
+    } catch (e) {}
+    updateAutoFillBtnState();
+    visitorNameInput.value = '';
+    visitorIdentifierInput.value = '';
+    userPinInput.value = '';
+    showToast('Cleared saved pass. You can enter new details.');
+  });
 }
 
 function applyPassDetails(name, identifier, pin) {
@@ -508,6 +531,34 @@ if (enterPassCodeBtn) {
     }
 
     showToast('Could not recognize pass format. Please enter details manually.', true);
+  });
+}
+
+// Quick jump to Manage Photos with PIN from Success Card
+const quickManagePhotosBtn = document.getElementById('quickManagePhotosBtn');
+if (quickManagePhotosBtn) {
+  quickManagePhotosBtn.addEventListener('click', () => {
+    let pass = null;
+    try {
+      const raw = localStorage.getItem('savedVisitorPass');
+      if (raw) pass = JSON.parse(raw);
+    } catch (e) {}
+
+    const name = (pass && pass.name) || visitorNameInput.value.trim();
+    const identifier = (pass && pass.identifier) || visitorIdentifierInput.value.trim();
+    const pin = (pass && pass.pin) || (displayPin ? displayPin.textContent.trim() : '');
+
+    const withdrawName = document.getElementById('withdrawName');
+    const withdrawIdentifier = document.getElementById('withdrawIdentifier');
+    const withdrawPin = document.getElementById('withdrawPin');
+
+    if (withdrawName && name) withdrawName.value = name;
+    if (withdrawIdentifier && identifier) withdrawIdentifier.value = identifier;
+    if (withdrawPin && pin) withdrawPin.value = pin;
+
+    if (tabManageBtn) tabManageBtn.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('Switched to photo management. Your PIN has been auto-filled.');
   });
 }
 
